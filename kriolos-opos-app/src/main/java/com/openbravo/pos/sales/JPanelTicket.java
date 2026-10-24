@@ -117,6 +117,7 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
 
         initUIComponents();
 
+
         LOGGER.log(System.Logger.Level.DEBUG, "JPanelTicket.init");
         m_config = app.getProperties();
 

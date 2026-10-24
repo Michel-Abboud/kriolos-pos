@@ -83,6 +83,10 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
         m_panelconfig.add(panel);
         jPanelLocale.add(panel.getConfigComponent());
 
+        panel = new JPanelConfigCurrency();
+        m_panelconfig.add(panel);
+        jTabbedPane1.addTab(AppLocal.getIntString("jpanelconfiguration.tab.currencies.title"), panel.getConfigComponent());
+
         panel = new JPanelConfigPayment();
         m_panelconfig.add(panel);
         jPanelPayment.add(panel.getConfigComponent());
@@ -177,7 +181,7 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
             if (closeEventListener != null) {
                 closeEventListener.windowClosed(new CloseEvent(this));
             }
-        } catch (HeadlessException | IOException e) {
+        } catch (HeadlessException | IOException | IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Error saving configuration file", e);
             JMessagePanel.showMessage(this,
                     new MessageInf(MessageInf.SGN_WARNING,

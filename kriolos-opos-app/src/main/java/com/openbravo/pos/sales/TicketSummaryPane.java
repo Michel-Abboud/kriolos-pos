@@ -18,6 +18,8 @@ package com.openbravo.pos.sales;
 
 import com.openbravo.basic.AppLocal;
 import com.openbravo.pos.ticket.TicketInfo;
+import com.openbravo.pos.config.AppConfig;
+import java.util.Locale;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -46,6 +48,8 @@ public class TicketSummaryPane extends JPanel {
     private final JLabel taxValueLabel;
     private final JLabel totalValueLabel;
     private final JPanel totalsPanel;
+    private final JLabel secondaryHeaderLabel;
+    private final JLabel secondaryValueLabel;
 
     public TicketSummaryPane() {
         super(new BorderLayout());
@@ -133,6 +137,31 @@ public class TicketSummaryPane extends JPanel {
         totalHeaderLabel.setLabelFor(totalValueLabel);
         totalsPanel.add(totalValueLabel);
 
+        totalValueLabel.setName("kriolos:sales:lbl-primary-currency-total");
+        secondaryHeaderLabel = new JLabel("", SwingConstants.CENTER);
+        secondaryHeaderLabel.setFont(headerFont);
+        secondaryValueLabel = new JLabel("", SwingConstants.CENTER);
+        secondaryValueLabel.setFont(totalValueFont);
+        secondaryValueLabel.setBorder(valueBorder);
+        secondaryValueLabel.setName("kriolos:sales:lbl-secondary-currency-total");
+        secondaryHeaderLabel.setLabelFor(secondaryValueLabel);
+        AppConfig config = AppConfig.getInstance();
+        totalHeaderLabel.setText(currencyTotalLabel(config.getProperty("currency.primary")));
+        String secondaryCode = config.getProperty("currency.secondary");
+        if (secondaryCode != null && !secondaryCode.isBlank()) {
+            secondaryHeaderLabel.setText(currencyTotalLabel(secondaryCode));
+            totalsPanel.removeAll();
+            totalsPanel.setLayout(new GridLayout(2, 4, 4, 0));
+            totalsPanel.setPreferredSize(new Dimension(680, 60));
+            totalsPanel.add(subtotalHeaderLabel);
+            totalsPanel.add(taxHeaderLabel);
+            totalsPanel.add(totalHeaderLabel);
+            totalsPanel.add(secondaryHeaderLabel);
+            totalsPanel.add(subtotalValueLabel);
+            totalsPanel.add(taxValueLabel);
+            totalsPanel.add(totalValueLabel);
+            totalsPanel.add(secondaryValueLabel);
+        }
         add(totalsPanel, BorderLayout.LINE_END);
     }
 
@@ -163,6 +192,7 @@ public class TicketSummaryPane extends JPanel {
         subtotalValueLabel.setText(subtotal);
         taxValueLabel.setText(tax);
         totalValueLabel.setText(total);
+        secondaryValueLabel.setText(null);
         repaint();
     }
 
@@ -176,7 +206,8 @@ public class TicketSummaryPane extends JPanel {
         if (ticket == null || ticket.getLinesCount() == 0) {
             updateTotals(null, null, null);
         } else {
-            updateTotals(ticket.printSubTotal(), ticket.printTax(), ticket.printTotal());
+            updateTotals(ticket.printSubTotal(), ticket.printTax(), ticket.printPrimaryTotal());
+            secondaryValueLabel.setText(ticket.printSecondaryTotal());
         }
     }
 
@@ -186,6 +217,11 @@ public class TicketSummaryPane extends JPanel {
     public void clear() {
         setTicketName(null);
         updateTotals(null, null, null);
+    }
+
+    private static String currencyTotalLabel(String code) {
+        return code == null || code.isBlank() ? AppLocal.getIntString("label.totalcash")
+                : code.trim().toUpperCase(Locale.ROOT) + " " + AppLocal.getIntString("label.totalcash");
     }
 
     public JLabel getTicketIdLabel() {
