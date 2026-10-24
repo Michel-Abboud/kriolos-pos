@@ -17,6 +17,7 @@ package com.openbravo.pos.sales.modern.one;
 
 import com.openbravo.format.Formats;
 import com.openbravo.pos.customers.CustomerInfoExt;
+import com.openbravo.pos.forms.AppConfig;
 import com.openbravo.pos.forms.AppLocal;
 import com.openbravo.pos.sales.modern.POSKeyBinder;
 import com.openbravo.pos.ticket.TicketInfo;
@@ -67,7 +68,11 @@ public class ModernTicketPane extends JPanel {
     // Totals labels
     private final JLabel subtotalValueLabel;
     private final JLabel taxValueLabel;
+    private final JLabel primaryTotalTitleLabel;
     private final JLabel totalValueLabel;
+    private final JLabel secondaryTotalTitleLabel;
+    private final JLabel secondaryTotalValueLabel;
+    private final JPanel secondaryTotalPanel;
 
     // Line item action buttons
     private final JButton btnQtyMinus;
@@ -293,7 +298,8 @@ public class ModernTicketPane extends JPanel {
         footerPanel.add(Box.createVerticalStrut(8));
 
         // Financial Summary Box
-        JPanel summaryCard = new JPanel(new GridLayout(3, 2, 8, 4));
+        JPanel summaryCard = new JPanel();
+        summaryCard.setLayout(new BoxLayout(summaryCard, BoxLayout.Y_AXIS));
         summaryCard.setOpaque(false);
         summaryCard.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 1, 0, UIManager.getColor("Separator.foreground") != null
@@ -301,29 +307,55 @@ public class ModernTicketPane extends JPanel {
                         : UIManager.getColor("Panel.background")),
                 BorderFactory.createEmptyBorder(8, 4, 8, 4)));
 
+        JPanel subtotalRow = new JPanel(new GridLayout(1, 2, 8, 0));
+        subtotalRow.setOpaque(false);
         JLabel subtotalLabel = new JLabel(AppLocal.getIntString("label.subtotalcash"));
         subtotalLabel.setHorizontalAlignment(SwingConstants.LEADING);
         subtotalValueLabel = new JLabel(Formats.CURRENCY.formatValue(0.0));
         subtotalValueLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 
+        subtotalRow.add(subtotalLabel);
+        subtotalRow.add(subtotalValueLabel);
+
+        JPanel taxRow = new JPanel(new GridLayout(1, 2, 8, 0));
+        taxRow.setOpaque(false);
         JLabel taxLabel = new JLabel(AppLocal.getIntString("label.taxcash"));
         taxLabel.setHorizontalAlignment(SwingConstants.LEADING);
         taxValueLabel = new JLabel(Formats.CURRENCY.formatValue(0.0));
         taxValueLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 
-        JLabel totalLabel = new JLabel(AppLocal.getIntString("label.totalcash"));
-        totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD, 17f));
-        totalLabel.setHorizontalAlignment(SwingConstants.LEADING);
+        taxRow.add(taxLabel);
+        taxRow.add(taxValueLabel);
+
+        JPanel currencyTotalsRow = new JPanel(new GridLayout(1, 2, 8, 0));
+        currencyTotalsRow.setOpaque(false);
+        JPanel primaryTotalPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        primaryTotalPanel.setOpaque(false);
+        primaryTotalTitleLabel = new JLabel(currencyTotalLabel(""), SwingConstants.CENTER);
+        primaryTotalTitleLabel.setFont(primaryTotalTitleLabel.getFont().deriveFont(Font.BOLD, 14f));
         totalValueLabel = new JLabel(Formats.CURRENCY.formatValue(0.0));
         totalValueLabel.setFont(totalValueLabel.getFont().deriveFont(Font.BOLD, 20f));
-        totalValueLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+        totalValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        totalValueLabel.setName("kriolos:sales:lbl-modern-one-primary-total");
+        primaryTotalPanel.add(primaryTotalTitleLabel);
+        primaryTotalPanel.add(totalValueLabel);
 
-        summaryCard.add(subtotalLabel);
-        summaryCard.add(subtotalValueLabel);
-        summaryCard.add(taxLabel);
-        summaryCard.add(taxValueLabel);
-        summaryCard.add(totalLabel);
-        summaryCard.add(totalValueLabel);
+        secondaryTotalPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        secondaryTotalPanel.setOpaque(false);
+        secondaryTotalTitleLabel = new JLabel(currencyTotalLabel(""), SwingConstants.CENTER);
+        secondaryTotalTitleLabel.setFont(secondaryTotalTitleLabel.getFont().deriveFont(Font.BOLD, 14f));
+        secondaryTotalValueLabel = new JLabel("", SwingConstants.CENTER);
+        secondaryTotalValueLabel.setFont(secondaryTotalValueLabel.getFont().deriveFont(Font.BOLD, 20f));
+        secondaryTotalValueLabel.setName("kriolos:sales:lbl-modern-one-secondary-total");
+        secondaryTotalPanel.add(secondaryTotalTitleLabel);
+        secondaryTotalPanel.add(secondaryTotalValueLabel);
+        secondaryTotalPanel.setVisible(false);
+
+        currencyTotalsRow.add(primaryTotalPanel);
+        currencyTotalsRow.add(secondaryTotalPanel);
+        summaryCard.add(subtotalRow);
+        summaryCard.add(taxRow);
+        summaryCard.add(currencyTotalsRow);
 
         footerPanel.add(summaryCard);
         footerPanel.add(Box.createVerticalStrut(8));
@@ -369,6 +401,8 @@ public class ModernTicketPane extends JPanel {
             subtotalValueLabel.setText(Formats.CURRENCY.formatValue(0.0));
             taxValueLabel.setText(Formats.CURRENCY.formatValue(0.0));
             totalValueLabel.setText(Formats.CURRENCY.formatValue(0.0));
+            secondaryTotalValueLabel.setText("");
+            secondaryTotalPanel.setVisible(false);
             btnPay.setText(POSButtonFactory.formatButtonText(
                     AppLocal.getIntString("button.pay") + "  " + Formats.CURRENCY.formatValue(0.0), UnicodeIcon.PAY));
             customerButton.setText(
@@ -413,7 +447,14 @@ public class ModernTicketPane extends JPanel {
 
         subtotalValueLabel.setText(Formats.CURRENCY.formatValue(subtotal));
         taxValueLabel.setText(Formats.CURRENCY.formatValue(taxes));
-        totalValueLabel.setText(Formats.CURRENCY.formatValue(total));
+        String secondaryTotal = ticket.printSecondaryTotal();
+        String primaryCode = AppConfig.getInstance().getProperty("currency.primary", "");
+        String secondaryCode = AppConfig.getInstance().getProperty("currency.secondary", "");
+        primaryTotalTitleLabel.setText(currencyTotalLabel(primaryCode));
+        totalValueLabel.setText(ticket.printPrimaryTotal());
+        secondaryTotalTitleLabel.setText(currencyTotalLabel(secondaryCode));
+        secondaryTotalValueLabel.setText(secondaryTotal);
+        secondaryTotalPanel.setVisible(!secondaryTotal.isEmpty());
 
         btnPay.setText(POSButtonFactory.formatButtonText(
                 AppLocal.getIntString("button.pay") + "  " + Formats.CURRENCY.formatValue(total), UnicodeIcon.PAY));
@@ -434,6 +475,11 @@ public class ModernTicketPane extends JPanel {
             table.setRowSelectionInterval(lastRow, lastRow);
             table.scrollRectToVisible(table.getCellRect(lastRow, 0, true));
         }
+    }
+
+    private static String currencyTotalLabel(String code) {
+        return code == null || code.isBlank() ? AppLocal.getIntString("label.totalcash")
+                : code.trim().toUpperCase(Locale.ROOT) + " " + AppLocal.getIntString("label.totalcash");
     }
 
     public int getSelectedLineIndex() {

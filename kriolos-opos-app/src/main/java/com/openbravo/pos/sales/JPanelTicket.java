@@ -132,6 +132,7 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
     private Boolean priceWith00;
     private RestaurantDBUtils restDB;
     private AppProperties m_config;
+    private javax.swing.JLabel m_jSecondaryTotal;
     // private Integer count = 0;
     // private Integer oCount = 0;
 
@@ -142,8 +143,11 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
 
         initComponents();
 
+        m_jTotalEuros.setName("kriolos:sales:lbl-primary-currency-total");
+
         LOGGER.log(System.Logger.Level.DEBUG, "JPanelTicket.init");
         m_config = app.getProperties();
+        configureCurrencyTotals();
 
         m_App = app;
         restDB = new RestaurantDBUtils(m_App);
@@ -480,6 +484,7 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
             m_jSubtotalEuros.setText(null);
             m_jTaxesEuros.setText(null);
             m_jTotalEuros.setText(null);
+            if (m_jSecondaryTotal != null) m_jSecondaryTotal.setText(null);
 
             checkStock();
             stateToZero();
@@ -572,12 +577,65 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
             m_jSubtotalEuros.setText(null);
             m_jTaxesEuros.setText(null);
             m_jTotalEuros.setText(null);
+            if (m_jSecondaryTotal != null) m_jSecondaryTotal.setText(null);
         } else {
             m_jSubtotalEuros.setText(m_oTicket.printSubTotal());
             m_jTaxesEuros.setText(m_oTicket.printTax());
-            m_jTotalEuros.setText(m_oTicket.printTotal());
+            m_jTotalEuros.setText(m_oTicket.printPrimaryTotal());
+            if (m_jSecondaryTotal != null) m_jSecondaryTotal.setText(m_oTicket.printSecondaryTotal());
         }
         repaint();
+    }
+
+    /** Adds the optional fourth total field outside the NetBeans generated form. */
+    private void configureCurrencyTotals() {
+        String primaryCode = m_config.getProperty("currency.primary");
+        String secondaryCode = m_config.getProperty("currency.secondary");
+        m_jLblTotalEuros.setText(currencyTotalLabel(primaryCode));
+        if (secondaryCode == null || secondaryCode.isBlank()) return;
+
+        javax.swing.JLabel secondaryLabel = new javax.swing.JLabel(currencyTotalLabel(secondaryCode), javax.swing.SwingConstants.CENTER);
+        secondaryLabel.setFont(m_jLblTotalEuros.getFont());
+        m_jSecondaryTotal = new javax.swing.JLabel((String) null, javax.swing.SwingConstants.CENTER);
+        m_jSecondaryTotal.setFont(m_jTotalEuros.getFont().deriveFont(16f));
+        m_jSecondaryTotal.setForeground(m_jTotalEuros.getForeground());
+        m_jSecondaryTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        m_jSecondaryTotal.setName("kriolos:sales:lbl-secondary-currency-total");
+        secondaryLabel.setLabelFor(m_jSecondaryTotal);
+        Dimension currencyTotalSize = new Dimension(190, 25);
+        m_jTotalEuros.setMinimumSize(currencyTotalSize);
+        m_jTotalEuros.setPreferredSize(currencyTotalSize);
+        m_jSecondaryTotal.setMinimumSize(currencyTotalSize);
+        m_jSecondaryTotal.setPreferredSize(currencyTotalSize);
+
+        m_jPanelTotals.removeAll();
+        m_jPanelTotals.setLayout(new java.awt.GridBagLayout());
+        m_jPanelTotals.setPreferredSize(new Dimension(680, 60));
+        m_jPanelTotals.setMinimumSize(new Dimension(560, 60));
+
+        java.awt.Component[] titles = {m_jLblSubTotalEuros, m_jLblTaxEuros,
+            m_jLblTotalEuros, secondaryLabel};
+        java.awt.Component[] values = {m_jSubtotalEuros, m_jTaxesEuros,
+            m_jTotalEuros, m_jSecondaryTotal};
+        double[] columnWeights = {0.75, 0.75, 1.25, 1.25};
+        for (int column = 0; column < titles.length; column++) {
+            java.awt.GridBagConstraints constraints = new java.awt.GridBagConstraints();
+            constraints.gridx = column;
+            constraints.weightx = columnWeights[column];
+            constraints.fill = java.awt.GridBagConstraints.BOTH;
+            constraints.insets = new java.awt.Insets(0, 0, 0, column == titles.length - 1 ? 0 : 4);
+            constraints.gridy = 0;
+            constraints.weighty = 0.35;
+            m_jPanelTotals.add(titles[column], constraints);
+            constraints.gridy = 1;
+            constraints.weighty = 0.65;
+            m_jPanelTotals.add(values[column], constraints);
+        }
+    }
+
+    private static String currencyTotalLabel(String code) {
+        return code == null || code.isBlank() ? AppLocal.getIntString("label.totalcash")
+                : code.trim().toUpperCase(java.util.Locale.ROOT) + " " + AppLocal.getIntString("label.totalcash");
     }
 
     private void paintTicketLine(int index, TicketLineInfo oLine) {

@@ -92,6 +92,16 @@ image::krpos-screenshot.gif[]
 
 == Run App From source
 
+For the fast Windows edit–compile–run loop, set JDK 17 and run the helper from the repository root. Close the POS window after changing code, then run it again:
+
+[source,powershell]
+----
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
+.\scripts\run-dev.cmd
+----
+
+This launches from compiled classes and does not generate an installer. See link:scripts/README.md[the development and Windows build commands] for the isolated configuration option.
+
 .Example Compile and Execute (windows powershell/Terminal)
 [source,cmd]
 ----
@@ -184,6 +194,8 @@ java -Dawt.toolkit.name=WLToolkit -Dsun.java2d.vulkan=True -jar SwingSet2.jar
 == Reference
 
 * link:{doc-dir}/[Documentation]
+* link:docs/maintainer-guide/README.md[Maintainer guide, development run, and Windows installer]
+* link:scripts/README.md[Generate MSI and portable Windows builds under dist/windows]
 
 == Screenshots 
 

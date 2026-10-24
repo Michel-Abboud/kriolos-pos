@@ -18,6 +18,7 @@ package com.openbravo.pos.sales.modern.two;
 
 import com.openbravo.format.Formats;
 import com.openbravo.pos.customers.CustomerInfoExt;
+import com.openbravo.pos.forms.AppConfig;
 import com.openbravo.pos.forms.AppLocal;
 import com.openbravo.pos.ticket.TicketInfo;
 import com.openbravo.pos.ticket.TicketLineInfo;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -75,7 +77,11 @@ public class ModernTwoTicketPane extends JPanel {
     private final JLabel subtotalLabel;
     private final JLabel taxLabel;
     private final JLabel discountLabel;
+    private final JLabel grandTotalTitleLabel;
     private final JLabel grandTotalLabel;
+    private final JLabel secondaryTotalTitleLabel;
+    private final JLabel secondaryTotalLabel;
+    private final JPanel secondaryTotalPanel;
 
     // Massive Pay Button
     private final JButton btnPay;
@@ -129,40 +135,74 @@ public class ModernTwoTicketPane extends JPanel {
         bottomContainer.setOpaque(false);
         bottomContainer.setBorder(BorderFactory.createEmptyBorder(6, 0, 2, 0));
 
-        JPanel totalsPanel = new JPanel(new GridLayout(4, 2, 8, 3));
+        JPanel totalsPanel = new JPanel();
+        totalsPanel.setLayout(new BoxLayout(totalsPanel, BoxLayout.Y_AXIS));
         totalsPanel.setOpaque(false);
         totalsPanel.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
 
+        JPanel subtotalRow = new JPanel(new GridLayout(1, 2, 8, 3));
+        subtotalRow.setOpaque(false);
         JLabel subtotalTitle = new JLabel(AppLocal.getIntString("label.subtotalcash") + ":");
         subtotalTitle.setFont(subtotalTitle.getFont().deriveFont(Font.PLAIN, 12f));
         subtotalLabel = new JLabel("0.00", SwingConstants.TRAILING);
         subtotalLabel.setFont(subtotalLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
+        subtotalRow.add(subtotalTitle);
+        subtotalRow.add(subtotalLabel);
+
+        JPanel taxRow = new JPanel(new GridLayout(1, 2, 8, 3));
+        taxRow.setOpaque(false);
         JLabel taxTitle = new JLabel(AppLocal.getIntString("label.taxcash") + ":");
         taxTitle.setFont(taxTitle.getFont().deriveFont(Font.PLAIN, 12f));
         taxLabel = new JLabel("0.00", SwingConstants.TRAILING);
         taxLabel.setFont(taxLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
+        taxRow.add(taxTitle);
+        taxRow.add(taxLabel);
+
+        JPanel discountRow = new JPanel(new GridLayout(1, 2, 8, 3));
+        discountRow.setOpaque(false);
         JLabel discountTitle = new JLabel(AppLocal.getIntString("label.discount") + ":");
         discountTitle.setFont(discountTitle.getFont().deriveFont(Font.PLAIN, 12f));
         discountLabel = new JLabel("0.00", SwingConstants.TRAILING);
         discountLabel.setFont(discountLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
-        JLabel grandTotalTitle = new JLabel(AppLocal.getIntString("label.totalcash") + ":");
-        grandTotalTitle.setFont(grandTotalTitle.getFont().deriveFont(Font.BOLD, 16f));
-        grandTotalTitle.setForeground(new Color(22, 163, 74)); // #16a34a
-        grandTotalLabel = new JLabel("0.00", SwingConstants.TRAILING);
+        discountRow.add(discountTitle);
+        discountRow.add(discountLabel);
+
+        JPanel currencyTotalsRow = new JPanel(new GridLayout(1, 2, 8, 3));
+        currencyTotalsRow.setOpaque(false);
+        JPanel primaryTotalPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        primaryTotalPanel.setOpaque(false);
+        grandTotalTitleLabel = new JLabel(currencyTotalLabel(""), SwingConstants.CENTER);
+        grandTotalTitleLabel.setFont(grandTotalTitleLabel.getFont().deriveFont(Font.BOLD, 14f));
+        grandTotalTitleLabel.setForeground(new Color(22, 163, 74)); // #16a34a
+        grandTotalLabel = new JLabel("0.00", SwingConstants.CENTER);
         grandTotalLabel.setFont(grandTotalLabel.getFont().deriveFont(Font.BOLD, 16f));
         grandTotalLabel.setForeground(new Color(22, 163, 74));
+        grandTotalLabel.setName("kriolos:sales:lbl-modern-two-primary-total");
+        primaryTotalPanel.add(grandTotalTitleLabel);
+        primaryTotalPanel.add(grandTotalLabel);
 
-        totalsPanel.add(subtotalTitle);
-        totalsPanel.add(subtotalLabel);
-        totalsPanel.add(taxTitle);
-        totalsPanel.add(taxLabel);
-        totalsPanel.add(discountTitle);
-        totalsPanel.add(discountLabel);
-        totalsPanel.add(grandTotalTitle);
-        totalsPanel.add(grandTotalLabel);
+        secondaryTotalPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        secondaryTotalPanel.setOpaque(false);
+        secondaryTotalTitleLabel = new JLabel(currencyTotalLabel(""), SwingConstants.CENTER);
+        secondaryTotalTitleLabel.setFont(secondaryTotalTitleLabel.getFont().deriveFont(Font.BOLD, 14f));
+        secondaryTotalTitleLabel.setForeground(new Color(22, 163, 74));
+        secondaryTotalLabel = new JLabel("", SwingConstants.CENTER);
+        secondaryTotalLabel.setFont(secondaryTotalLabel.getFont().deriveFont(Font.BOLD, 16f));
+        secondaryTotalLabel.setForeground(new Color(22, 163, 74));
+        secondaryTotalLabel.setName("kriolos:sales:lbl-modern-two-secondary-total");
+        secondaryTotalPanel.add(secondaryTotalTitleLabel);
+        secondaryTotalPanel.add(secondaryTotalLabel);
+        secondaryTotalPanel.setVisible(false);
+
+        currencyTotalsRow.add(primaryTotalPanel);
+        currencyTotalsRow.add(secondaryTotalPanel);
+        totalsPanel.add(subtotalRow);
+        totalsPanel.add(taxRow);
+        totalsPanel.add(discountRow);
+        totalsPanel.add(currencyTotalsRow);
         bottomContainer.add(totalsPanel, BorderLayout.PAGE_START);
 
         // Massive Pay Button (Image 1 style)
@@ -197,7 +237,14 @@ public class ModernTwoTicketPane extends JPanel {
             subtotalLabel.setText(Formats.CURRENCY.formatValue(subtotal));
             taxLabel.setText(Formats.CURRENCY.formatValue(tax));
             discountLabel.setText(Formats.CURRENCY.formatValue(0.0));
-            grandTotalLabel.setText(Formats.CURRENCY.formatValue(total));
+            String secondaryTotal = ticket.printSecondaryTotal();
+            String primaryCode = AppConfig.getInstance().getProperty("currency.primary", "");
+            String secondaryCode = AppConfig.getInstance().getProperty("currency.secondary", "");
+            grandTotalTitleLabel.setText(currencyTotalLabel(primaryCode));
+            grandTotalLabel.setText(ticket.printPrimaryTotal());
+            secondaryTotalTitleLabel.setText(currencyTotalLabel(secondaryCode));
+            secondaryTotalLabel.setText(secondaryTotal);
+            secondaryTotalPanel.setVisible(!secondaryTotal.isEmpty());
 
             // Auto-select latest item
             if (tableModel.getRowCount() > 0) {
@@ -211,7 +258,14 @@ public class ModernTwoTicketPane extends JPanel {
             taxLabel.setText("0.00");
             discountLabel.setText("0.00");
             grandTotalLabel.setText("0.00");
+            secondaryTotalLabel.setText("");
+            secondaryTotalPanel.setVisible(false);
         }
+    }
+
+    private static String currencyTotalLabel(String code) {
+        return code == null || code.isBlank() ? AppLocal.getIntString("label.totalcash")
+                : code.trim().toUpperCase(Locale.ROOT) + " " + AppLocal.getIntString("label.totalcash");
     }
 
     public int getSelectedLineIndex() {

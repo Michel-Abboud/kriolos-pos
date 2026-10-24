@@ -605,6 +605,31 @@ public final class TicketInfo implements SerializableRead, Externalizable {
         return Formats.CURRENCY.formatValue(getTotal());
     }
 
+    /** Formatted base amount when a base ISO currency is configured. */
+    public String printPrimaryTotal() {
+        try {
+            String value = dualCurrency().formatPrimary(getTotal(), Locale.getDefault());
+            return value == null ? printTotal() : value;
+        } catch (IllegalArgumentException ex) {
+            return printTotal();
+        }
+    }
+
+    /** Display-only converted amount available to Velocity receipt templates. */
+    public String printSecondaryTotal() {
+        try {
+            return dualCurrency().formatSecondary(getTotal(), Locale.getDefault());
+        } catch (IllegalArgumentException ex) {
+            return "";
+        }
+    }
+
+    private DualCurrencyTotal dualCurrency() {
+        AppConfig config = getConfig();
+        return new DualCurrencyTotal(config.getProperty("currency.primary"),
+                config.getProperty("currency.secondary"), config.getProperty("currency.secondary.rate"));
+    }
+
     public String printTotalPaid() {
         return Formats.CURRENCY.formatValue(getTotalPaid());
     }
