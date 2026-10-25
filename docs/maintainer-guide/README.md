@@ -44,6 +44,10 @@ In a `Printer.Ticket` resource, use `${ticket.printPrimaryTotal()}` and `${ticke
 
 This is a display conversion. It does not lock a historical exchange rate into the sale; a reprint after a rate change uses the new rate.
 
+## Product barcode generation
+
+The product editor has a **Generate** button immediately to the right of Barcode Type. It creates a 13-digit value with the internal-use `200` prefix, calculates the EAN-13 check digit, and queries `DataLogicPIM.getProductInfoByCode()` before filling the Barcode field. A collision generates another candidate, up to 100 attempts. The button also selects the `EAN-13` barcode type. The existing unique index `products_inx_1` on `products.code` remains the final protection against concurrent duplicates at save time. The checksum implementation and tests are in `Ean13BarcodeGenerator`; the lookup remains in `ProductsEditor` because the domain generator has no database dependency.
+
 ## More notes
 
 - [Build and run on Windows](installer.md)

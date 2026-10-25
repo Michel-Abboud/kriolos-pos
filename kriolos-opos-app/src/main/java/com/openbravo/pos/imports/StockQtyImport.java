@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -107,6 +108,7 @@ public class StockQtyImport extends JPanel implements JPanelView {
     initComponents();
 
     dbSession = appView.getSession();
+    m_props = appView.getProperties();
     
     this.m_props = appView.getProperties();
     
@@ -158,7 +160,13 @@ public class StockQtyImport extends JPanel implements JPanelView {
     Properties m_propsdb = (resourceService != null) ? resourceService.getResourceAsProperties(m_props.getHost() + "/properties") : new Properties();
 
     // Get terminal'dbSession set Location property <entry key="location">0</entry>
-    m_sInventoryLocation = m_propsdb.getProperty("location");
+    m_sInventoryLocation = m_propsdb == null ? null : m_propsdb.getProperty("location");
+    if (m_sInventoryLocation == null || m_sInventoryLocation.isBlank()) {
+      m_sInventoryLocation = appView.getInventoryLocation();
+    }
+    if (m_sInventoryLocation == null || m_sInventoryLocation.isBlank()) {
+      m_sInventoryLocation = "0";
+    }
     try {
       Location = m_dlInventory.findLocationName(m_sInventoryLocation);
     } catch (BasicException ex) {
@@ -356,10 +364,12 @@ public class StockQtyImport extends JPanel implements JPanelView {
 
     jTextUpdate.setText(Integer.toString(qtyUpdates));
 
-    JOptionPane.showMessageDialog(this,
-        "Import Complete",
-        "Imported",
-        JOptionPane.WARNING_MESSAGE);
+    if (!GraphicsEnvironment.isHeadless()) {
+      JOptionPane.showMessageDialog(this,
+          "Import Complete",
+          "Imported",
+          JOptionPane.WARNING_MESSAGE);
+    }
 
     progress = 100;
     webPBar.setValue(progress);
@@ -383,10 +393,14 @@ public class StockQtyImport extends JPanel implements JPanelView {
       if (prodInfo != null) {
         prodStock = m_dlInventory.getProductStockState(prodInfo.getID(), m_sInventoryLocation);
         productBarcode = products.get(0);
-        oldQty = prodStock.getUnits();
+        oldQty = prodStock == null || prodStock.getUnits() == null ? 0.0 : prodStock.getUnits();
         newQty = Double.valueOf(products.get(1));
         productQty = oldQty + newQty;
-        updateStockCurrent(m_sInventoryLocation, prodInfo.getID(), productQty);
+        if (prodStock == null) {
+          addStockCurrent(m_sInventoryLocation, prodInfo.getID(), productQty);
+        } else {
+          updateStockCurrent(m_sInventoryLocation, prodInfo.getID(), productQty);
+        }
         CSVStockUpdate(Location, productBarcode, newQty);
         qtyUpdates++;
       }
@@ -413,7 +427,9 @@ public class StockQtyImport extends JPanel implements JPanelView {
         prodStock = m_dlInventory.getProductStockState(prodInfo.getID(), m_sInventoryLocation);
         productQty = 0.;
 
-        deleteStockCurrent(m_sInventoryLocation, prodInfo.getID(), productQty);
+        if (prodStock != null) {
+          deleteStockCurrent(m_sInventoryLocation, prodInfo.getID(), productQty);
+        }
       }
     } catch (BasicException ex) {
       LOGGER.log(Level.WARNING, null, ex);

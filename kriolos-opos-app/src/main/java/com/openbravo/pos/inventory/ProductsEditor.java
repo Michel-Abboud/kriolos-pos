@@ -66,6 +66,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
 
     private static final Logger LOGGER = Logger.getLogger(ProductsEditor.class.getName());
     private static final long serialVersionUID = 1L;
+    private static final int BARCODE_GENERATION_ATTEMPTS = 100;
 
     private ComboBoxValModel m_CategoryModel;
     private ComboBoxValModel taxcatmodel;
@@ -283,6 +284,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         m_jRef.setEnabled(false);
         m_jCode.setEnabled(false);
         m_jCodetype.setEnabled(false);
+        jBtnGenerateBarcode.setEnabled(false);
         m_jName.setEnabled(false);
         m_jCategory.setEnabled(false);
         m_jAtt.setEnabled(false);
@@ -378,6 +380,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         m_jRef.setEnabled(true);
         m_jCode.setEnabled(true);
         m_jCodetype.setEnabled(true);
+        jBtnGenerateBarcode.setEnabled(true);
         m_jName.setEnabled(true);
         m_jCategory.setEnabled(true);
         m_jTax.setEnabled(true);
@@ -486,6 +489,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         m_jRef.setEnabled(true);
         m_jCode.setEnabled(true);
         m_jCodetype.setEnabled(true);
+        jBtnGenerateBarcode.setEnabled(true);
         m_jName.setEnabled(true);
         m_jCategory.setEnabled(true);
         m_jTax.setEnabled(true);
@@ -591,6 +595,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         m_jRef.setEnabled(false);
         m_jCode.setEnabled(false);
         m_jCodetype.setEnabled(false);
+        jBtnGenerateBarcode.setEnabled(false);
         m_jName.setEnabled(false);
         m_jCategory.setEnabled(false);
         m_jTax.setEnabled(false);
@@ -671,6 +676,30 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
                 }
             }
             prodFieldEditLock = false;
+        }
+    }
+
+    private void generateUniqueEan13Barcode() {
+        try {
+            for (int attempt = 0; attempt < BARCODE_GENERATION_ATTEMPTS; attempt++) {
+                String candidate = Ean13BarcodeGenerator.generate();
+                if (dataLogicPIM.getProductInfoByCode(candidate) == null) {
+                    m_jCode.setText(candidate);
+                    m_jCodetype.setSelectedItem("EAN-13");
+                    m_jCode.requestFocusInWindow();
+                    return;
+                }
+            }
+            JOptionPane.showMessageDialog(this,
+                    AppLocal.getIntString("message.generatebarcode.failed"),
+                    AppLocal.getIntString("button.generatebarcode"),
+                    JOptionPane.ERROR_MESSAGE);
+        } catch (BasicException ex) {
+            LOGGER.log(Level.SEVERE, "Unable to check generated barcode uniqueness", ex);
+            JOptionPane.showMessageDialog(this,
+                    AppLocal.getIntString("message.generatebarcode.database"),
+                    AppLocal.getIntString("button.generatebarcode"),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -1095,6 +1124,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         jLabel6 = new javax.swing.JLabel();
         m_jCode = new javax.swing.JTextField();
         m_jCodetype = new javax.swing.JComboBox();
+        jBtnGenerateBarcode = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         m_jName = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
@@ -1223,6 +1253,16 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         m_jCodetype.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         m_jCodetype.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "EAN-13", "EAN-8", "CODE128", "Upc-A", "Upc-E" }));
         m_jCodetype.setPreferredSize(new java.awt.Dimension(80, 30));
+
+        jBtnGenerateBarcode.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        jBtnGenerateBarcode.setText(AppLocal.getIntString("button.generatebarcode")); // NOI18N
+        jBtnGenerateBarcode.setToolTipText(AppLocal.getIntString("tooltip.generatebarcode")); // NOI18N
+        jBtnGenerateBarcode.setPreferredSize(new java.awt.Dimension(95, 30));
+        jBtnGenerateBarcode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBtnGenerateBarcodeActionPerformed(evt);
+            }
+        });
 
         jLabel2.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         jLabel2.setText(AppLocal.getIntString("label.prodnamem")); // NOI18N
@@ -1371,10 +1411,12 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
                                 .addGap(89, 89, 89))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(m_jRef, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(m_jCode, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(m_jRef, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(m_jCode, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(m_jCodetype, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(m_jCodetype, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jBtnGenerateBarcode, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(m_jInCatalog, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(42, 42, 42)
@@ -1400,7 +1442,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(m_jSendStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE)))))
-                .addGap(56, 56, 56))
+                .addGap(10, 10, 10))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1413,7 +1455,8 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(m_jCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(m_jCodetype, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(m_jCodetype, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jBtnGenerateBarcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2223,6 +2266,10 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         }
     }//GEN-LAST:event_m_jCodeFocusLost
 
+    private void jBtnGenerateBarcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnGenerateBarcodeActionPerformed
+        generateUniqueEan13Barcode();
+    }//GEN-LAST:event_jBtnGenerateBarcodeActionPerformed
+
     private void m_jRefFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_m_jRefFocusLost
         setCode();
     }//GEN-LAST:event_m_jRefFocusLost
@@ -2245,6 +2292,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
     private javax.swing.JButton jBtnBold;
     private javax.swing.JButton jBtnBreak;
     private javax.swing.JButton jBtnColour;
+    private javax.swing.JButton jBtnGenerateBarcode;
     private javax.swing.JButton jBtnImage;
     private javax.swing.JButton jBtnItalic;
     private javax.swing.JButton jBtnLarge;
