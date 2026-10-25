@@ -109,6 +109,12 @@ public class ApplicationShell extends JPanel implements AppView {
 
     public ApplicationShell(AppConfig config) {
         initComponents();
+        remove(contentContainerPanel);
+        javax.swing.JScrollPane workspaceScroll = new javax.swing.JScrollPane(contentContainerPanel,
+                javax.swing.JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        workspaceScroll.setBorder(null);
+        add(workspaceScroll, java.awt.BorderLayout.CENTER);
         setName("kriolos:app:shell");
         this.bootstrapConfig = config;
         this.appProperties = config;
