@@ -68,6 +68,7 @@ public class JRootMenu {
         LOGGER.log(Level.FINE, "Loading Root.Menu from database resource");
         try {
             String menuScrip = dlSystem.getResourceAsText("Menu.Root");
+            menuScrip = includeCategoryImport(menuScrip);
             menuComponent = getScriptMenu(menuScrip);
 
             if (menuComponent == null) {
@@ -86,6 +87,17 @@ public class JRootMenu {
         catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Exception on setup Root.Menu", ex);
         }
+    }
+
+    private static String includeCategoryImport(String menuScript) {
+        if (menuScript == null || menuScript.contains("com.openbravo.pos.imports.CategoryCSVImport")) {
+            return menuScript;
+        }
+        String productEntry = "submenu.addPanel(\"/com/openbravo/images/import.png\", "
+                + "\"Menu.CSVImport\", \"com.openbravo.pos.imports.JPanelCSVImport\");";
+        String categoryEntry = "\n        submenu.addPanel(\"/com/openbravo/images/import.png\", "
+                + "\"Menu.CategoryCSVImport\", \"com.openbravo.pos.imports.CategoryCSVImport\");";
+        return menuScript.replace(productEntry, productEntry + categoryEntry);
     }
 
     private Component getScriptMenu(String menutext) {

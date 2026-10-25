@@ -50,6 +50,18 @@ The product editor has a **Generate** button immediately to the right of Barcode
 
 ## More notes
 
+### Import categories from CSV
+
+Open **Tools > Categories Import**, choose a CSV file, select its encoding and separator, then click **Read headers**. Map **Name** and any optional fields before clicking **Import categories**. A sample file is:
+
+```csv
+Name,Parent,Text tip,Show name,Catalog order,Catalog color,In catalog,Image
+Drinks,,Cold and hot drinks,yes,1,#3478A2,yes,
+Tea,Drinks,Tea products,yes,2,#5A9B69,yes,images/tea.png
+```
+
+Supported fields are ID, Name, Parent, Text tip, Show name, Catalog order, Catalog color, In catalog, and Image. Parent accepts a category ID or name, including a parent later in the same file. Image paths are relative to the CSV file. Boolean fields accept `yes/no`, `true/false`, `y/n`, or `1/0`. Existing categories update by ID when provided, otherwise by a unique case-insensitive name. Unmapped or blank optional fields retain their existing values; new rows use the normal category defaults. The whole file is checked before changes are committed, and a database error rolls the import back. Roles with permission to import products also have permission to import categories. Existing stores receive the new Tools entry at runtime when their stored menu still contains the standard Products Import entry.
+
 - [Build and run on Windows](installer.md)
 - [Architecture and change checklist](architecture.md)
 - [Embedded HSQLDB for development and installs](hsqldb.md)

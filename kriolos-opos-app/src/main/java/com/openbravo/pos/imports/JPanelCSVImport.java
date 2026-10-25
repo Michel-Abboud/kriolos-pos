@@ -1712,7 +1712,7 @@ public class JPanelCSVImport extends JPanel implements JPanelView {
         );
 
         jComboSeparator.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        jComboSeparator.setPreferredSize(new java.awt.Dimension(50, 45));
+        jComboSeparator.setPreferredSize(new java.awt.Dimension(70, 30));
 
         importProgressBar.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
         importProgressBar.setPreferredSize(new java.awt.Dimension(240, 45));
@@ -1729,7 +1729,7 @@ public class JPanelCSVImport extends JPanel implements JPanelView {
         jCBiso.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         jCBiso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ISO-8859-1", "ISO-8859-2", "ISO-8859-3", "ISO-8859-4", "ISO-8859-5", "ISO-8859-6", "ISO-8859-7", "ISO-8859-8", "ISO-8859-9", "ISO-8859-10", "UTF-8", "UTF-16", " " }));
         jCBiso.setToolTipText(bundle.getString("tooltip.import.cbiso")); // NOI18N
-        jCBiso.setPreferredSize(new java.awt.Dimension(125, 45));
+        jCBiso.setPreferredSize(new java.awt.Dimension(135, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1768,8 +1768,8 @@ public class JPanelCSVImport extends JPanel implements JPanelView {
                 .addComponent(jFileChooserPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jCBiso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jComboSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
+                    .addComponent(jCBiso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jHeaderRead, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)

@@ -72,8 +72,8 @@
               <Component id="jFileChooserPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jCBiso" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jComboSeparator" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jCBiso" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="jComboSeparator" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jHeaderRead" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1209,7 +1209,7 @@
           <StringArray count="0"/>
         </Property>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-          <Dimension value="[50, 45]"/>
+          <Dimension value="[70, 30]"/>
         </Property>
       </Properties>
     </Component>
@@ -1273,7 +1273,7 @@
           <ResourceString bundle="pos_messages.properties" key="tooltip.import.cbiso" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-          <Dimension value="[125, 45]"/>
+          <Dimension value="[135, 30]"/>
         </Property>
       </Properties>
       <AuxValues>

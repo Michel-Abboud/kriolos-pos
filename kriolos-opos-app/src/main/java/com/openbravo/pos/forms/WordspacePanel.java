@@ -69,6 +69,11 @@ public class WordspacePanel extends JPanel implements AppUserView {
         AppUserPermissionsLoader aupLoader = new AppUserPermissionsLoader(dataLogicSystem);
         Set<String> userPermissions = aupLoader.getPermissionsForRole(appCurrentUser.getRole());
         appCurrentUser.fillPermissions(userPermissions);
+        // Existing store roles predate this importer. Grant the matching
+        // category tool to roles already allowed to import products.
+        if (appCurrentUser.hasPermission("com.openbravo.pos.imports.JPanelCSVImport")) {
+            appCurrentUser.fillPermissions(Set.of("com.openbravo.pos.imports.CategoryCSVImport"));
+        }
 
         initComponents();
         applyComponentOrientation(appRootPanel.getComponentOrientation());

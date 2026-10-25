@@ -74,6 +74,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.event.ListSelectionEvent;
 
 /**
@@ -239,6 +240,39 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
         add(m_ticketsbag.getNullComponent(), "null");
 
         m_jPanelCatalog.add(getSouthComponent(), BorderLayout.CENTER);
+    }
+
+    /** Lets classic sales reserve space for the calculator and resize the catalog. */
+    protected final void installResizableCatalog() {
+        m_jPanelContainer.remove(m_jPanelTicket);
+        m_jPanelContainer.remove(m_jPanelCatalog);
+
+        m_jPanelTicket.setMinimumSize(new Dimension(0, 350));
+        m_jPanelCatalog.setMinimumSize(new Dimension(0, 80));
+        m_jPanelCatalog.setPreferredSize(new Dimension(0, 160));
+
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                m_jPanelTicket, m_jPanelCatalog);
+        split.setName("kriolos:sales:classic:catalog-split");
+        split.setContinuousLayout(true);
+        split.setResizeWeight(1.0);
+        split.setOneTouchExpandable(true);
+        split.setDividerSize(12);
+        split.setBorder(null);
+        split.addComponentListener(new java.awt.event.ComponentAdapter() {
+            private boolean initialized;
+
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                if (!initialized && split.getHeight() > 0) {
+                    initialized = true;
+                    int location = Math.max(350, split.getHeight() - 160);
+                    split.setDividerLocation(Math.max(0,
+                            Math.min(location, split.getHeight() - 80)));
+                }
+            }
+        });
+        m_jPanelContainer.add(split, BorderLayout.CENTER);
     }
 
     @Override
