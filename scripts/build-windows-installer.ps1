@@ -21,9 +21,30 @@ $javaVersion = (& $java --version | Select-Object -First 1).ToString()
 if ($javaVersion -notmatch '^java (17|18|19|2[0-9])\.') {
     throw "JDK 17 or newer is required. Found: $javaVersion"
 }
-if (-not $ImageOnly -and ((-not (Get-Command candle.exe -ErrorAction SilentlyContinue)) -or
-    (-not (Get-Command light.exe -ErrorAction SilentlyContinue)))) {
-    throw 'WiX Toolset 3 candle.exe and light.exe must be on PATH to create an MSI with JDK 17 jpackage.'
+if (-not $ImageOnly) {
+    $candle = Get-Command candle.exe -ErrorAction SilentlyContinue
+    $light = Get-Command light.exe -ErrorAction SilentlyContinue
+    if (-not $candle -or -not $light) {
+        $wixCandidates = @()
+        if (${env:ProgramFiles(x86)}) {
+            $wixCandidates += Join-Path ${env:ProgramFiles(x86)} 'WiX Toolset v3.14\bin'
+        }
+        if ($env:ProgramFiles) {
+            $wixCandidates += Join-Path $env:ProgramFiles 'WiX Toolset v3.14\bin'
+        }
+        foreach ($wixBin in $wixCandidates) {
+            if ((Test-Path -LiteralPath (Join-Path $wixBin 'candle.exe')) -and
+                (Test-Path -LiteralPath (Join-Path $wixBin 'light.exe'))) {
+                $env:PATH = $wixBin + [IO.Path]::PathSeparator + $env:PATH
+                break
+            }
+        }
+        $candle = Get-Command candle.exe -ErrorAction SilentlyContinue
+        $light = Get-Command light.exe -ErrorAction SilentlyContinue
+    }
+    if (-not $candle -or -not $light) {
+        throw 'WiX Toolset 3 candle.exe and light.exe were not found on PATH or in the standard WiX 3.14 installation directory.'
+    }
 }
 
 Push-Location $root
