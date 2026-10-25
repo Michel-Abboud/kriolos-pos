@@ -40,6 +40,7 @@ import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -338,6 +339,7 @@ public class AuthenticationPanel extends javax.swing.JPanel {
                 @Override
                 public void onSuccess(DatabaseConfig activatedConfig, DataLogicSystem dlSystem) {
                     activeDbConfig = activatedConfig;
+                    rememberActiveDatabase(activatedConfig);
                     updateDataLogicSystem(dlSystem);
                     setBusy(false, "Ligado com sucesso a " + activatedConfig.name());
                     updateBadgeAndButtons();
@@ -367,6 +369,17 @@ public class AuthenticationPanel extends javax.swing.JPanel {
                 LOGGER.log(Level.WARNING, "Error activating database", ex);
                 setBusy(false, "Erro ao conectar");
                 updateBadgeAndButtons();
+            }
+        }
+    }
+
+    private void rememberActiveDatabase(DatabaseConfig database) {
+        if (appProperties instanceof AppConfig config) {
+            config.setProperty("db.default", database.name());
+            try {
+                config.save();
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Could not remember selected database", ex);
             }
         }
     }

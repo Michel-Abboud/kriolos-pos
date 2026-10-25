@@ -57,6 +57,12 @@ public class DBMigrator {
 
             //Run basebase
             liquibase.update("pos-database-update");
+            // Liquibase can leave the shared Session connection with auto-commit
+            // disabled. Subsequent POS edits would then vanish on shutdown.
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+                conn.setAutoCommit(true);
+            }
             res = true;
         } catch (DatabaseException ex) {
             LOGGER.log(Level.SEVERE,"DB Migration Exception: " , ex);

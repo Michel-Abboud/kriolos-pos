@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import javax.swing.JScrollPane;
 
 /**
  *
@@ -82,7 +83,11 @@ public abstract class JPanelTable extends JPanel implements JPanelView, BeanFact
         c = getEditor().getComponent();
         if (c != null) {
             c.applyComponentOrientation(getComponentOrientation());
-            container.add(c, BorderLayout.CENTER);
+            JScrollPane editorScroll = new JScrollPane(c,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            editorScroll.setBorder(null);
+            container.add(editorScroll, BorderLayout.CENTER);
         }
 
         // el panel este
@@ -114,6 +119,13 @@ public abstract class JPanelTable extends JPanel implements JPanelView, BeanFact
         c = new JSaver(bd);
         c.applyComponentOrientation(getComponentOrientation());
         toolbar.add(c);
+
+        // Keep the save controls reachable when the window is narrow.
+        JScrollPane toolbarScroll = new JScrollPane(toolbar,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        toolbarScroll.setBorder(null);
+        container.add(toolbarScroll, BorderLayout.NORTH);
     }
 
     public Component getToolbarExtras() {

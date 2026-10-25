@@ -86,6 +86,12 @@ public class ApplicationShell extends JPanel implements AppView {
 
     public ApplicationShell(AppProperties props) {
         initComponents();
+        remove(contentContainerPanel);
+        javax.swing.JScrollPane workspaceScroll = new javax.swing.JScrollPane(contentContainerPanel,
+                javax.swing.JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        workspaceScroll.setBorder(null);
+        add(workspaceScroll, java.awt.BorderLayout.CENTER);
         setName("kriolos:app:shell");
         appProperties = props;
         remove(topPanel); //Occupie spaces

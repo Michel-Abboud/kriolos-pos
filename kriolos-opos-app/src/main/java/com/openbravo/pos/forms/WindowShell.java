@@ -26,6 +26,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -146,6 +147,10 @@ public class WindowShell extends javax.swing.JFrame implements AppMessage {
 
     private void modeWindow() {
         pack();
+        Rectangle usable = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getMaximumWindowBounds();
+        setSize(Math.min(getWidth(), usable.width),
+                Math.min(getHeight(), usable.height));
         setLocationRelativeTo(null); // center
         setVisible(true);
     }
