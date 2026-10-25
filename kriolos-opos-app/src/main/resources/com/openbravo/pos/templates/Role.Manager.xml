@@ -167,6 +167,7 @@
 
     <class name="com.openbravo.pos.imports.JPanelCSV"/>
     <class name="com.openbravo.pos.imports.JPanelCSVImport"/>
+    <class name="com.openbravo.pos.imports.CategoryCSVImport"/>
     <class name="com.openbravo.pos.imports.JPanelCSVCleardb"/>
     <class name="/com/openbravo/reports/tools_newproducts.bs"/>
     <class name="/com/openbravo/reports/tools_updatedprices.bs"/>

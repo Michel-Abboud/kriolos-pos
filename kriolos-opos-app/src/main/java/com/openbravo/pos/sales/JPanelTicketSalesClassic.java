@@ -41,6 +41,7 @@ public class JPanelTicketSalesClassic extends JPanelTicket {
 
     public JPanelTicketSalesClassic(AppView app) {
         super(app);
+        installResizableCatalog();
         getTicketlines().addListSelectionListener(new CatalogSelectionListener());
     }
 

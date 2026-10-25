@@ -2,8 +2,8 @@ package com.openbravo.pos.imports;
 
 import com.openbravo.data.loader.Session;
 import com.openbravo.pos.data.DBMigrator;
-import com.openbravo.pos.forms.AppProperties;
-import com.openbravo.pos.forms.AppView;
+import com.openbravo.basic.AppProperties;
+import com.openbravo.pos.panels.AppView;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
