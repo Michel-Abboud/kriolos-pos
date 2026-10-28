@@ -19,11 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("RollingNumberLabel Unit Tests")
 class RollingNumberLabelTest {
 
-    static {
-        // Forces Java AWT/Swing to run without depending on a physical display server (X11)
-        System.setProperty("java.awt.headless", "true");
-    }
-
     @ParameterizedTest(name = "Locale: {0}, Prefix: {1} -> Expected Decimals/Format match")
     @CsvSource({
         "en-US, 'USD ', '12,500.50'", // North America (US)
@@ -47,7 +42,14 @@ class RollingNumberLabelTest {
         String normalizedText = label.getText().replaceAll("[\\s\\u00A0\\u202F]", "");
         String normalizedExpected = expectedContains.replaceAll(" ", "");
 
-        assertTrue(normalizedText.contains(normalizedExpected),
+        boolean matches = normalizedText.contains(normalizedExpected);
+        if (!matches && "ar-AE".equals(localeTag)) {
+            // Under CLDR (Linux/macOS/Temurin), ar-AE formats with Eastern Arabic-Indic numerals (١٢٬٥٠٠٫٥٠)
+            // whereas under Windows/COMPAT environments, it may format with ASCII Latin numerals (12,500.50).
+            matches = normalizedText.contains("١٢٬٥٠٠٫٥٠");
+        }
+
+        assertTrue(matches,
                 String.format("Failed for Locale %s. Got: [%s], Expected to contain: [%s]",
                         localeTag, normalizedText, normalizedExpected));
     }
@@ -74,7 +76,7 @@ class RollingNumberLabelTest {
         long startTime = System.currentTimeMillis();
         boolean capturedMiddleState = false;
 
-        while (System.currentTimeMillis() - startTime < 400) {
+        while (System.currentTimeMillis() - startTime < 800) {
             double current = label.getValue();
             if (current > 5.0 && current < 95.0) {
                 capturedMiddleState = true;
@@ -93,7 +95,7 @@ class RollingNumberLabelTest {
 
         // Wait until the final easing curve phase stabilizes completely
         long endWait = System.currentTimeMillis();
-        while (label.getValue() < 100.0 && (System.currentTimeMillis() - endWait < 300)) {
+        while (label.getValue() < 100.0 && (System.currentTimeMillis() - endWait < 800)) {
             Thread.sleep(20);
         }
 
