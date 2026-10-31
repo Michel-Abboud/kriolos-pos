@@ -588,7 +588,7 @@ public class JPanelCSVImport extends JPanel implements JPanelView {
                 catalogService.createCategory(newcat);
 
                 cat_list = new HashMap<>();
-                productCategories = dataLogicPIM.getCategoriesListAll();
+                productCategories = catalogService.getCategoriesListAll();
                 m_CategoryModel = new ComboBoxValModel(new ArrayList<>(productCategories));
                 if (!category_default.equals(jComboCategory.getSelectedItem())) {
                     m_CategoryModel.add(reject_bad_category);
@@ -778,7 +778,7 @@ public class JPanelCSVImport extends JPanel implements JPanelView {
         taxcatmodel = new ComboBoxValModel(taxcatsent.list());
 
         // Get categories list
-        productCategories = dataLogicPIM.getCategoriesListAll();
+        productCategories = catalogService.getCategoriesListAll();
         m_CategoryModel = new ComboBoxValModel(new ArrayList<>(productCategories));
         m_CategoryModel.add(reject_bad_category);
         jComboDefaultCategory.setModel(m_CategoryModel);

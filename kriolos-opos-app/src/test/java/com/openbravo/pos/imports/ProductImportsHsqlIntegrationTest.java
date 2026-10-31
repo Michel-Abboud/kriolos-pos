@@ -4,6 +4,8 @@ import com.openbravo.data.loader.Session;
 import com.openbravo.pos.data.DBMigrator;
 import com.openbravo.basic.AppProperties;
 import com.openbravo.pos.panels.AppView;
+import com.openbravo.pos.suppliers.SupplierService;
+import com.openbravo.pos.suppliers.DataLogicSuppliers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -171,8 +173,11 @@ class ProductImportsHsqlIntegrationTest {
     }
 
     private static AppView appView(Session session, AppProperties properties, String locationId) {
+        DataLogicSuppliers suppliers = new DataLogicSuppliers();
+        suppliers.init(session);
         return proxy(AppView.class, (proxy, method, args) -> switch (method.getName()) {
             case "getSession" -> session;
+            case "getBean" -> args[0] == SupplierService.class ? suppliers : null;
             case "getProperties" -> properties;
             case "getInventoryLocation" -> locationId;
             case "toString" -> "ScratchAppView";

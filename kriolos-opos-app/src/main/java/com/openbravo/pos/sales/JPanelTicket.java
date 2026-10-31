@@ -57,7 +57,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.event.ListSelectionEvent;
 
 /**
  *
@@ -118,7 +117,6 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
     public JPanelTicket(AppView app) {
 
         initUIComponents();
-
 
         LOGGER.log(System.Logger.Level.DEBUG, "JPanelTicket.init");
         m_config = app.getProperties();

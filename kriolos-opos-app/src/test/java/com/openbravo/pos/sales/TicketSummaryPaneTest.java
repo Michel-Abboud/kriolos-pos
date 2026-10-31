@@ -114,4 +114,38 @@ class TicketSummaryPaneTest {
         assertNull(pane.getTaxText());
         assertNull(pane.getTotalText());
     }
+    @Test
+    void displaysConvertedTotalAndClearsItWithoutChangingTicketTotal() {
+        var config = com.openbravo.pos.config.AppConfig.getInstance();
+        String primary = config.getProperty("currency.primary");
+        String secondary = config.getProperty("currency.secondary");
+        String rate = config.getProperty("currency.secondary.rate");
+        try {
+            config.setProperty("currency.primary", "USD");
+            config.setProperty("currency.secondary", "LBP");
+            config.setProperty("currency.secondary.rate", "90000");
+            TicketSummaryPane pane = new TicketSummaryPane();
+            TicketInfo ticket = new TicketInfo();
+            ticket.addLine(new TicketLineInfo("prod-1", "Test Product", "tax-1", 1.0, 10.0, null));
+            pane.updateTotals(ticket);
+            assertEquals(ticket.printPrimaryTotal(), pane.getTotalText());
+            var totals = (javax.swing.JPanel) pane.getTotalValueLabel().getParent();
+            javax.swing.JLabel converted = null;
+            for (var component : totals.getComponents()) {
+                if ("kriolos:sales:lbl-secondary-currency-total".equals(component.getName())) {
+                    converted = (javax.swing.JLabel) component;
+                }
+            }
+            assertNotNull(converted);
+            assertEquals(ticket.printSecondaryTotal(), converted.getText());
+            assertTrue(converted.getText().startsWith("LBP "));
+            assertEquals(10.0, ticket.getTotal());
+            pane.clear();
+            assertNull(converted.getText());
+        } finally {
+            config.setProperty("currency.primary", primary);
+            config.setProperty("currency.secondary", secondary);
+            config.setProperty("currency.secondary.rate", rate);
+        }
+    }
 }

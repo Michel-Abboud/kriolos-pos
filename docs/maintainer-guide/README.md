@@ -8,7 +8,7 @@ This checkout is a Java 17, Maven, Swing continuation of uniCenta oPOS. If you a
 | --- | --- |
 | Parent build, module versions, Java baseline | `pom.xml` |
 | Startup and window lifecycle | `kriolos-opos-app/.../forms/BootstrapPOS.java`, `ApplicationShell.java` |
-| Configuration file and defaults | `kriolos-opos-domain/.../forms/AppConfig.java` |
+| Configuration file and defaults | `kriolos-opos-domain/.../config/AppConfig.java` |
 | Configuration screen | `kriolos-opos-app/.../config/JPanelConfiguration.java`; each tab implements `PanelConfig` |
 | Sale editing and classic ticket panel | `kriolos-opos-app/.../sales/JPanelTicket.java`, `JTicketLines.java` |
 | Modern sale layouts | `kriolos-opos-app/.../sales/modern/` and `kriolos-opos-ui-api` |
