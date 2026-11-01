@@ -16,5 +16,6 @@
     <include file="pos_liquidbase/db-changelog-v5_0_1.xml"/>
     <include file="pos_liquidbase/db-changelog-v5_0_2.xml"/>
     <include file="pos_liquidbase/db-changelog-sqlite-timestamps.xml"/>
+    <include file="pos_liquidbase/db-changelog-login-branding.xml"/>
     
 </databaseChangeLog>

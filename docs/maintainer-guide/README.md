@@ -52,21 +52,29 @@ Deleting the current sale or a selected line takes effect immediately. Role perm
 
 Configuration > Ticket Setup > **Receipt Print Off** sets the initial checkout printer state. When checked, the printer starts off in classic and both modern sales layouts. The cashier can still turn it on for an individual receipt. In classic sales, `Ticket.Buttons` can also set `<printselected value="false"/>` to start with printing off. Configuration changes require a restart.
 
-The Resources screen edits entries in the current database: `Printer.Ticket` and other `Printer.*` receipt templates, `Menu.Root`, `Ticket.Buttons`, and `script.*` scripts. It is not a general editor for all application text or Swing layouts. Login prompts, status messages, and most screen labels come from `pos_messages.properties` and the language bundles; changing those requires rebuilding the application. Configuration > Language & Region selects the language. Existing database resources are preserved when installing a new build, so edit those resources in the running application when customizing an existing store.
+The Resources screen edits entries in the current database: login branding (`Login.*`), `Printer.Ticket` and other `Printer.*` receipt templates, `Menu.Root`, `Ticket.Buttons`, and `script.*` scripts. Most other prompts, status messages, and screen labels come from `pos_messages.properties` and the language bundles; changing those requires rebuilding the application. Configuration > Language & Region selects the language. Existing database resources are preserved when installing a new build, so edit those resources in the running application when customizing an existing store.
 
 ## Startup screen text and images
 
-The default login and database-status labels are in English. To customize the initial screen:
+Open **Maintenance > Resources** after activating the store database. The following resources are added automatically on the first startup of this build, including existing databases:
 
 | What to change | Where to edit |
 | --- | --- |
-| Central welcome text and license panel | The HTML text block in `kriolos-opos-app/src/main/java/com/openbravo/pos/forms/components/CopyrightPanel.java` |
-| Logo at the top of the login screen | `kriolos-opos-assets-image/src/main/resources/com/openbravo/images/logo_100×100.png`, referenced by `AuthenticationPanel.java` |
-| Login heading and database/status prompts | `kriolos-opos-app/src/main/resources/pos_messages.properties`, including `JAuthPanel.m_LoginLabel.text`, `button.activate`, and `label.database.*`; translated labels live in the language modules |
+| Central welcome text | `Login.Welcome` (Text): plain text or HTML beginning with `<html>` |
+| Logo at the top of the login screen | `Login.Logo` (Image): use the resource's image picker to import a PNG/JPEG; it fits within 320 by 120 pixels and keeps its aspect ratio |
+| Heading above the login users | `Login.Header` (Text), initially `Login` |
+| Text beside the logo | `Login.Vendor` (Text), initially empty; accepts plain text or Swing HTML |
+| Database/status prompts | `pos_messages.properties`, including `button.activate` and `label.database.*`; translated labels live in the language modules |
 | User names and user pictures | Maintenance > Users in the running application |
 | Database names in the selector | Configuration > Database |
 
-Source text and logo changes require a new build: run `scripts/build-windows-installer.cmd -ImageOnly` and launch the newly generated app. The Resources screen does not override the central welcome panel or login logo.
+Save each resource, then log out to preview it. No rebuild or restart is needed for these resource edits. Content belongs to the active database, so each store can have different branding; before a database connects the bundled defaults appear. Missing/invalid logos fall back to the bundled logo, and missing text resources fall back to bundled defaults. Empty text deliberately hides that text. HTML uses Swing's limited HTML renderer, rather than browser JavaScript or modern CSS. For example, set `Login.Welcome` to:
+
+```html
+<html><center><h1>My Store</h1><p>Welcome! Select your user to begin.</p></center></html>
+```
+
+The default welcome HTML includes the project's license notice; the distribution's license files and source notices are separate. Default templates live in `src/main/resources/com/openbravo/pos/templates/Login.*`; the guarded `db-changelog-login-branding.xml` inserts missing defaults and preserves store customizations.
 
 Enter submits password/text prompts. In classic sales, Enter opens checkout when no barcode is pending; with a pending barcode, it adds or looks up that product. The on-screen barcode button keeps its barcode-only action. Checkout permissions and the payment confirmation step still apply.
 
@@ -98,5 +106,6 @@ Supported fields are ID, Name, Parent, Text tip, Show name, Catalog order, Catal
 
 - [Build and run on Windows](installer.md)
 - [Architecture and change checklist](architecture.md)
+- [Michel Abboud commit review](michel-commits.md)
 - [Embedded HSQLDB for development and installs](hsqldb.md)
 - Existing [development guide](../modules/guide-devel/pages/index.adoc) and [database overview](../modules/guide-devel/pages/database-overview.adoc)

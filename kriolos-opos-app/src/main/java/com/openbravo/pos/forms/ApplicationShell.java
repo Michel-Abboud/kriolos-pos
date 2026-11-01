@@ -460,6 +460,7 @@ public class ApplicationShell extends JPanel implements AppView {
                 SwingUtilities.invokeLater(() -> mAuthPanel.activateSelectedDatabase());
             }
         }
+        mAuthPanel.refreshBranding(systemService);
         showView("login");
     }
 

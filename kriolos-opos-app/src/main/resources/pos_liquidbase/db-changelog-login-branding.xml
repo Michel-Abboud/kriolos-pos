@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <!-- Independent guards preserve any resources already customized by a store. -->
+    <changeSet id="20261101-login-logo" author="kriolos">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM resources WHERE name = 'Login.Logo'</sqlCheck>
+        </preConditions>
+        <insert tableName="resources">
+            <column name="id" value="login-branding-logo"/>
+            <column name="name" value="Login.Logo"/>
+            <column name="restype" valueNumeric="1"/>
+            <column name="content" valueBlobFile="../com/openbravo/images/logo_100×100.png"/>
+        </insert>
+    </changeSet>
+    <changeSet id="20261101-login-welcome" author="kriolos">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM resources WHERE name = 'Login.Welcome'</sqlCheck>
+        </preConditions>
+        <insert tableName="resources">
+            <column name="id" value="login-branding-welcome"/>
+            <column name="name" value="Login.Welcome"/>
+            <column name="restype" valueNumeric="0"/>
+            <column name="content" valueBlobFile="../com/openbravo/pos/templates/Login.Welcome.html"/>
+        </insert>
+    </changeSet>
+    <changeSet id="20261101-login-header" author="kriolos">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM resources WHERE name = 'Login.Header'</sqlCheck>
+        </preConditions>
+        <insert tableName="resources">
+            <column name="id" value="login-branding-header"/>
+            <column name="name" value="Login.Header"/>
+            <column name="restype" valueNumeric="0"/>
+            <column name="content" valueBlobFile="../com/openbravo/pos/templates/Login.Header.txt"/>
+        </insert>
+    </changeSet>
+    <changeSet id="20261101-login-vendor" author="kriolos">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM resources WHERE name = 'Login.Vendor'</sqlCheck>
+        </preConditions>
+        <insert tableName="resources">
+            <column name="id" value="login-branding-vendor"/>
+            <column name="name" value="Login.Vendor"/>
+            <column name="restype" valueNumeric="0"/>
+            <column name="content" valueBlobFile="../com/openbravo/pos/templates/Login.Vendor.txt"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

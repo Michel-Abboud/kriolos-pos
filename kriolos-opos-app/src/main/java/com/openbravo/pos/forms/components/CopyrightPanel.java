@@ -1,9 +1,7 @@
 package com.openbravo.pos.forms.components;
 
-import com.openbravo.basic.AppLocal;
 import java.awt.BorderLayout;
 import java.awt.Font;
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -29,31 +27,15 @@ public class CopyrightPanel extends javax.swing.JPanel {
         setName("kriolos:copyright:panel");
         copyRightLabel.setName("kriolos:copyright:lbl-content");
 
-        copyRightLabel.setText(String.format("""
-            <html>
-            <center>
-            <h1>KriolOS POS</h1>
-            <b>Open Source Point Of Sale</b></br></br>
-            <p>More info on <a href="%s">official site</a></p>
-            <p>%s</p>
-            </center>
-            <br>
-            <br>
-            <h2>License: GPL v3</h2>
-            <br>This program is free software: you can redistribute it and/or modify 
-            <br>it under the terms of the GNU General Public License as published by 
-            <br>the Free Software Foundation, either version 3 of the License, 
-            <br>or (at your option) any later version.
-            <br>This program is distributed in the hope that it will be useful, 
-            <br>but WITHOUT ANY WARRANTY; without even the implied warranty 
-            <br>of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-            <br>See the GNU General Public License for more details.
-            <br>You should have received a copy of the GNU General Public License 
-            <br>along with this program. If not, see http://www.gnu.org/licenses/
-            <br>
-            </html>
-            """, OFICIAL_S, OFICIAL_S)
-        );
+        try {
+            setContent(LoginBranding.defaultWelcome());
+        } catch (java.io.IOException ex) {
+            setContent("KriolOS POS\n" + OFICIAL_S);
+        }
+    }
+
+    public void setContent(String content) {
+        copyRightLabel.setText(LoginBranding.displayText(content));
     }
 
     /**

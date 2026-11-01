@@ -267,7 +267,11 @@ public final class ResourcesView extends JPanel implements EditorRecord {
     
     private String getResourceSyntaxStyle(String resource) {
 
-        if (resource.contains("<?xml")) {
+        if (resource == null || resource.isBlank()) {
+            return SyntaxConstants.SYNTAX_STYLE_NONE;
+        } else if (resource.stripLeading().toLowerCase(java.util.Locale.ROOT).startsWith("<html>")) {
+            return SyntaxConstants.SYNTAX_STYLE_HTML;
+        } else if (resource.contains("<?xml")) {
             return SyntaxConstants.SYNTAX_STYLE_XML;
         } else if (resource.contains("INSERT") || resource.contains("SELECT") 
                 || resource.contains("UPDATE") || resource.contains("DELETE")) {

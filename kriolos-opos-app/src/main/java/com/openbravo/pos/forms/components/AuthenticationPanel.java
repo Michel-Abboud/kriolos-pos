@@ -29,6 +29,8 @@ import com.openbravo.pos.panels.AppView;
 import com.openbravo.pos.forms.ApplicationShell;
 import com.openbravo.pos.admin.DataLogicSystem;
 import com.openbravo.pos.admin.SecurityService;
+import com.openbravo.pos.admin.SystemService;
+import com.openbravo.pos.resources.ResourceService;
 import com.openbravo.pos.forms.DatabaseActivationCallback;
 import com.openbravo.pos.spi.config.BootstrapConfig.DatabaseConfig;
 import com.openbravo.ui.components.ButtonSize;
@@ -87,6 +89,9 @@ public class AuthenticationPanel extends javax.swing.JPanel {
     private final AppProperties appProperties;
     private final AuthListener authListener;
     private SecurityService securityService;
+    private CopyrightPanel welcomePanel;
+    private javax.swing.Icon defaultLogo;
+    private int brandingRequest;
 
     private DatabaseConfig activeDbConfig = null;
     private StringBuilder inputtext;
@@ -356,6 +361,7 @@ public class AuthenticationPanel extends javax.swing.JPanel {
         }
 
         setBusy(true, AppLocal.getIntString("label.database.checkingconnection"));
+        refreshBranding(null);
         showLoadingUsersList(AppLocal.getIntString("label.database.loadingusersfrom", selected.name()));
 
         if (appView instanceof ApplicationShell shell) {
@@ -366,13 +372,18 @@ public class AuthenticationPanel extends javax.swing.JPanel {
                 }
 
                 @Override
-                public void onSuccess(DatabaseConfig activatedConfig, DataLogicSystem dlSystem) {
+                public void onSuccess(DatabaseConfig activatedConfig, SystemService systemService) {
                     activeDbConfig = activatedConfig;
                     rememberActiveDatabase(activatedConfig);
-                    updateSecurityService(dlSystem);
+                    updateSecurityService(systemService);
                     setBusy(false, AppLocal.getIntString("label.database.connectedsuccess", activatedConfig.name()));
                     updateBadgeAndButtons();
                     m_txtKeys.requestFocus();
+                }
+
+                @Override
+                public void onSuccess(DatabaseConfig activatedConfig, DataLogicSystem dlSystem) {
+                    onSuccess(activatedConfig, (SystemService) dlSystem);
                 }
 
                 @Override
@@ -457,7 +468,9 @@ public class AuthenticationPanel extends javax.swing.JPanel {
         m_txtKeys.setName("kriolos:auth:txt-barcode-keys");
 
         mainScrollPanel.setName("kriolos:auth:scroll-main");
-        mainScrollPanel.setViewportView(new CopyrightPanel());
+        defaultLogo = vendorImageLabel.getIcon();
+        welcomePanel = new CopyrightPanel();
+        mainScrollPanel.setViewportView(welcomePanel);
         mainScrollPanel.setBorder(BorderFactory.createEmptyBorder());
         usersLisScrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(30, 30));
         showListPeople();
@@ -552,7 +565,46 @@ public class AuthenticationPanel extends javax.swing.JPanel {
 
     public void updateSecurityService(SecurityService securityService) {
         this.securityService = securityService;
+        refreshBranding(securityService instanceof ResourceService resources ? resources : null);
         showListPeople();
+        revalidate();
+        repaint();
+    }
+
+    /** Re-read saved resources on activation/logout without blocking the Swing thread. */
+    public void refreshBranding(ResourceService resources) {
+        final int request = ++brandingRequest;
+        new javax.swing.SwingWorker<LoginBranding, Void>() {
+            @Override
+            protected LoginBranding doInBackground() throws Exception {
+                return LoginBranding.load(resources);
+            }
+
+            @Override
+            protected void done() {
+                if (request != brandingRequest) return;
+                try {
+                    applyBranding(get());
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Could not load login branding", ex);
+                }
+            }
+        }.execute();
+    }
+
+    void applyBranding(LoginBranding branding) {
+        javax.swing.Icon logo = defaultLogo;
+        if (branding.logo() != null) {
+            var image = branding.logo();
+            double scale = Math.min(1.0, Math.min(320.0 / image.getWidth(), 120.0 / image.getHeight()));
+            logo = new ImageIcon(scale < 1.0 ? image.getScaledInstance(
+                    Math.max(1, (int) (image.getWidth() * scale)),
+                    Math.max(1, (int) (image.getHeight() * scale)), java.awt.Image.SCALE_SMOOTH) : image);
+        }
+        vendorImageLabel.setIcon(logo);
+        vendorImageLabel.setText(LoginBranding.displayText(branding.vendor()));
+        headerLabel.setText(LoginBranding.displayText(branding.header()));
+        welcomePanel.setContent(branding.welcome());
         revalidate();
         repaint();
     }
