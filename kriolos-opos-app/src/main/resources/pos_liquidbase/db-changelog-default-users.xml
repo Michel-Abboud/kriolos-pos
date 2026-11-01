@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <!-- Run before the historical loader. Its people-count guard then skips its
+         three-user seed. Never remove users or replace permissions in an existing store. -->
+    <changeSet id="20261101-default-admin-manager" author="kriolos">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <sqlCheck expectedResult="0">SELECT COUNT(*) FROM people</sqlCheck>
+                <sqlCheck expectedResult="0">SELECT COUNT(*) FROM roles</sqlCheck>
+            </and>
+        </preConditions>
+        <insert tableName="roles">
+            <column name="id" value="1"/>
+            <column name="name" value="ADMIN"/>
+            <column name="permissions" valueBlobFile="../com/openbravo/pos/templates/Role.Administrator.xml"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="id" value="2"/>
+            <column name="name" value="MANAGER"/>
+            <column name="permissions" valueBlobFile="../com/openbravo/pos/templates/Role.Manager.Default.xml"/>
+        </insert>
+        <insert tableName="people">
+            <column name="id" value="1"/>
+            <column name="name" value="admin"/>
+            <column name="apppassword" value="admin"/>
+            <column name="card" value=""/>
+            <column name="role" value="1"/>
+            <column name="visible" valueBoolean="true"/>
+            <column name="image" valueBlobFile="../com/openbravo/images/no_photo.png"/>
+        </insert>
+        <insert tableName="people">
+            <column name="id" value="2"/>
+            <column name="name" value="manager"/>
+            <column name="apppassword" value="manager"/>
+            <column name="card" value=""/>
+            <column name="role" value="2"/>
+            <column name="visible" valueBoolean="true"/>
+            <column name="image" valueBlobFile="../com/openbravo/images/no_photo.png"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

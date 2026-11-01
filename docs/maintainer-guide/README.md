@@ -31,6 +31,19 @@ The root `README.adoc` describes the fork history: KriolOS descends from uniCent
 6. Preserve NetBeans `GEN-BEGIN`/`GEN-END` sections and the matching `.form` files. New dynamic components can be wired after `initComponents()`.
 7. Build from the root with `./mvnw.cmd -pl kriolos-opos-app -am test` and test the relevant layout and receipt on a scratch database.
 
+## Initial users and roles
+
+New, empty databases start with exactly two visible users and two roles:
+
+| User | Initial password | Role and default navigation |
+| --- | --- | --- |
+| `admin` | `admin` | ADMIN: unchanged Administrator permissions, including Maintenance and Configuration |
+| `manager` | `manager` | MANAGER: Sales, Edit Sales, Stock, Sales reports, Change Password, Printers and Logout |
+
+The Manager retains checkout, sale-editing and refund actions, plus the forms/reports within Stock and Sales reports. Customers, Suppliers, Payments, Close Cash, Maintenance, Tools, Configuration and employee-management navigation are excluded. Users and permissions remain editable through Maintenance > Users and Roles by the Administrator.
+
+`db-changelog-default-users.xml` runs after schema creation and before the historical data loader, only when both `people` and `roles` are empty. It seeds the unchanged `Role.Administrator.xml` and the restricted `Role.Manager.Default.xml`; the historical loader then skips its old three-user seed using its existing people-count guard. The old loader and `Role.Manager.xml` stay intact for migration/checksum compatibility. Existing store users, passwords and roles are preserved, including any existing employee accounts. This default change does not reconfigure an already initialized store. `DefaultUsersMigrationTest` verifies fresh creation, default logins, exact permitted top-level navigation, Stock/Sales submenu access, restart and preservation of an actual legacy seed with customized roles on HSQLDB and SQLite.
+
 ## Dual currency added here
 
 Open Configuration > Currencies. Enter three values: main ISO 4217 code, secondary ISO 4217 code, and the number of secondary units for one main unit. For example, `USD`, `LBP`, `90000`. The secondary code may be blank to disable conversion. The sale views show separate side by side totals labeled from the configured codes, such as `USD Total` and `LBP Total`. The conversion uses decimal arithmetic and the secondary currency's fraction digits. Prices, taxes, accounting payments, cash totals, and saved ticket totals remain in the main currency. Sales and reprint conversions use the current configured rate; cash checkout also accepts tender in both currencies as described below.

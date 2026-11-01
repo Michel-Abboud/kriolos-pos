@@ -11,6 +11,8 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
      
     <include file="pos_liquidbase/db-changelog-v4_5.xml"/>
+    <!-- Seed fresh stores before the legacy loader; existing users/roles are preserved. -->
+    <include file="pos_liquidbase/db-changelog-default-users.xml"/>
     <include file="pos_liquidbase/db-changelog-v4_5__LOAD.xml"/>
     <include file="pos_liquidbase/db-changelog-v5_0.xml"/>
     <include file="pos_liquidbase/db-changelog-v5_0_1.xml"/>

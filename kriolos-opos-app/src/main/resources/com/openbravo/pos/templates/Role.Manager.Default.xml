@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   KriolOS POS - Open Source Point Of Sale
+   Copyright (c) 2019-2026 KriolOS.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<!-- Fresh-store Manager defaults. The historical Role.Manager.xml is retained
+     for migration compatibility. Administrators can edit the saved role normally. -->
+<permissions>
+    <!-- Sales and Edit Sales, including their checkout and editing actions. -->
+    <class name="com.openbravo.pos.sales.JPanelTicketSales"/>
+    <class name="com.openbravo.pos.sales.JPanelTicketEdits"/>
+    <class name="sales.Override"/>
+    <class name="sales.ViewSharedTicket"/>
+    <class name="sales.DeleteLines"/>
+    <class name="sales.EditLines"/>
+    <class name="sales.EditTicket"/>
+    <class name="sales.RefundTicket"/>
+    <class name="sales.PrintTicket"/>
+    <class name="sales.Total"/>
+    <class name="sales.ChangeTaxOptions"/>
+    <class name="sales.PrintRemote"/>
+    <class name="sales.DeleteTicket"/>
+    <class name="payment.bank"/>
+    <class name="payment.cash"/>
+    <class name="payment.cheque"/>
+    <class name="payment.voucher"/>
+    <class name="payment.magcard"/>
+    <class name="payment.slip"/>
+    <class name="payment.free"/>
+    <class name="payment.debt"/>
+    <class name="refund.cash"/>
+    <class name="refund.cheque"/>
+    <class name="refund.voucher"/>
+    <class name="refund.magcard"/>
+    <class name="button.totaldiscount"/>
+    <class name="button.print"/>
+    <class name="button.opendrawer"/>
+    <class name="button.linediscount"/>
+    <class name="button.sendorder"/>
+    <class name="button.refundit"/>
+    <class name="button.scharge"/>
+    <class name="button.keyboard"/>
+
+    <!-- Stock forms and reports. -->
+    <class name="com.openbravo.pos.forms.MenuStockManagement"/>
+    <class name="com.openbravo.pos.inventory.AttributesPanel"/>
+    <class name="com.openbravo.pos.inventory.AttributeValuesPanel"/>
+    <class name="com.openbravo.pos.inventory.AttributeSetsPanel"/>
+    <class name="com.openbravo.pos.inventory.AttributeUsePanel"/>
+    <class name="com.openbravo.pos.inventory.AuxiliarPanel"/>
+    <class name="com.openbravo.pos.inventory.BundlePanel"/>
+    <class name="com.openbravo.pos.inventory.CategoriesPanel"/>
+    <class name="com.openbravo.pos.inventory.ProductsPanel"/>
+    <class name="com.openbravo.pos.inventory.ProductsWarehousePanel"/>
+    <class name="com.openbravo.pos.inventory.StockDiaryPanel"/>
+    <class name="com.openbravo.pos.inventory.StockManagement"/>
+    <class name="com.openbravo.pos.inventory.UomPanel"/>
+    <class name="/com/openbravo/reports/barcode_sheet.bs"/>
+    <class name="/com/openbravo/reports/barcode_sheet_jm.bs"/>
+    <class name="/com/openbravo/reports/barcode_shelfedgelabels.bs"/>
+    <class name="/com/openbravo/reports/inventory.bs"/>
+    <class name="/com/openbravo/reports/inventoryb.bs"/>
+    <class name="/com/openbravo/reports/inventory_diary.bs"/>
+    <class name="/com/openbravo/reports/inventorybroken.bs"/>
+    <class name="/com/openbravo/reports/inventorydiff.bs"/>
+    <class name="/com/openbravo/reports/inventorydiffdetail.bs"/>
+    <class name="/com/openbravo/reports/inventorylistdetail.bs"/>
+    <class name="/com/openbravo/reports/productscatalog.bs"/>
+    <class name="/com/openbravo/reports/products.bs"/>
+    <class name="/com/openbravo/reports/productlabels.bs"/>
+    <class name="/com/openbravo/reports/salecatalog.bs"/>
+
+    <!-- Sales reports (the second Sales entry in the navigation). -->
+    <class name="com.openbravo.pos.forms.MenuSalesManagement"/>
+    <class name="/com/openbravo/reports/sales_cashflow.bs"/>
+    <class name="/com/openbravo/reports/sales_cashregisterlog.bs"/>
+    <class name="/com/openbravo/reports/sales_categorysales.bs"/>
+    <class name="/com/openbravo/reports/sales_categorysales_1.bs"/>
+    <class name="/com/openbravo/reports/sales_closedpos.bs"/>
+    <class name="/com/openbravo/reports/sales_closedpos_1.bs"/>
+    <class name="/com/openbravo/reports/sales_closedproducts.bs"/>
+    <class name="/com/openbravo/reports/sales_closedproducts_1.bs"/>
+    <class name="/com/openbravo/reports/sales_extendedcashregisterlog.bs"/>
+    <class name="/com/openbravo/reports/sales_extproducts.bs"/>
+    <class name="/com/openbravo/reports/sales_paymentreport.bs"/>
+    <class name="/com/openbravo/reports/sales_productsalesprofit.bs"/>
+    <class name="/com/openbravo/reports/sales_saletaxes.bs"/>
+    <class name="/com/openbravo/reports/sales_taxcatsales.bs"/>
+    <class name="/com/openbravo/reports/sales_taxes.bs"/>
+    <class name="/com/openbravo/reports/sales_chart_chartsales.bs"/>
+    <class name="/com/openbravo/reports/sales_chart_piesalescat.bs"/>
+    <class name="/com/openbravo/reports/sales_chart_productsales.bs"/>
+    <class name="/com/openbravo/reports/sales_chart_timeseriesproduct.bs"/>
+    <class name="/com/openbravo/reports/sales_chart_top10sales.bs"/>
+
+    <class name="Menu.ChangePassword"/>
+    <class name="com.openbravo.pos.panels.JPanelPrinter"/>
+    <!-- AppUser grants Menu.Exit to every user automatically. -->
+</permissions>
