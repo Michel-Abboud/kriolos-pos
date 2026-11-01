@@ -91,7 +91,8 @@ public class AuthenticationPanel extends javax.swing.JPanel {
     private SecurityService securityService;
     private CopyrightPanel welcomePanel;
     private javax.swing.Icon defaultLogo;
-    private int brandingRequest;
+    private volatile int brandingRequest;
+    private final LoginBrandingCache brandingCache;
 
     private DatabaseConfig activeDbConfig = null;
     private StringBuilder inputtext;
@@ -115,7 +116,14 @@ public class AuthenticationPanel extends javax.swing.JPanel {
      * @param authcListener Listener receiving successful authentication events.
      */
     public AuthenticationPanel(AppView app, SecurityService securityService, AppProperties props, AuthListener authcListener) {
+        this(app, securityService, props, authcListener, new LoginBrandingCache(
+                AppConfig.getBaseApplicationDataDirectory().toPath().resolve("login-branding")));
+    }
+
+    AuthenticationPanel(AppView app, SecurityService securityService, AppProperties props,
+                        AuthListener authcListener, LoginBrandingCache brandingCache) {
         this.appView = app;
+        this.brandingCache = brandingCache;
         this.authListener = authcListener;
         this.appProperties = props;
         this.securityService = securityService;
@@ -471,6 +479,7 @@ public class AuthenticationPanel extends javax.swing.JPanel {
         defaultLogo = vendorImageLabel.getIcon();
         welcomePanel = new CopyrightPanel();
         mainScrollPanel.setViewportView(welcomePanel);
+        showBrandingPlaceholder();
         mainScrollPanel.setBorder(BorderFactory.createEmptyBorder());
         usersLisScrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(30, 30));
         showListPeople();
@@ -574,22 +583,44 @@ public class AuthenticationPanel extends javax.swing.JPanel {
     /** Re-read saved resources on activation/logout without blocking the Swing thread. */
     public void refreshBranding(ResourceService resources) {
         final int request = ++brandingRequest;
+        final DatabaseConfig database = resources == null ? getSelectedDatabase() : activeDbConfig;
         new javax.swing.SwingWorker<LoginBranding, Void>() {
             @Override
             protected LoginBranding doInBackground() throws Exception {
-                return LoginBranding.load(resources);
+                if (resources == null) {
+                    try { return brandingCache.load(database); }
+                    catch (IOException ex) {
+                        LOGGER.log(Level.FINE, "Ignoring unreadable login branding cache", ex);
+                        return null;
+                    }
+                }
+                LoginBranding branding = LoginBranding.load(resources);
+                if (request == brandingRequest) {
+                    try { brandingCache.save(database, branding); }
+                    catch (IOException ex) { LOGGER.log(Level.WARNING, "Could not cache login branding", ex); }
+                }
+                return branding;
             }
 
             @Override
             protected void done() {
                 if (request != brandingRequest) return;
                 try {
-                    applyBranding(get());
+                    LoginBranding branding = get();
+                    if (branding != null) applyBranding(branding);
+                    else showBrandingPlaceholder();
                 } catch (Exception ex) {
                     LOGGER.log(Level.WARNING, "Could not load login branding", ex);
                 }
             }
         }.execute();
+    }
+
+    private void showBrandingPlaceholder() {
+        vendorImageLabel.setIcon(null);
+        vendorImageLabel.setText("");
+        headerLabel.setText(AppLocal.getIntString("JAuthPanel.m_LoginLabel.text"));
+        welcomePanel.setContent(AppLocal.getIntString("label.login.branding.pending"));
     }
 
     void applyBranding(LoginBranding branding) {
