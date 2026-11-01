@@ -295,6 +295,9 @@
         </createTable>
     </changeSet>
     <changeSet author="pauloborges (generated)" id="1603928315936-19">
+        <!-- Before upstream 0478bbdb this table used INT qty/displayid.
+             Accept only that historical checksum; a forward migration upgrades its columns. -->
+        <validCheckSum>9:e9b9b069ca8f50a61072fc15f2b6b39d</validCheckSum>
         <createTable tableName="orders">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>

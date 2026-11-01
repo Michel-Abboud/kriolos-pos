@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <!-- 0478bbdb changed the original createTable instead of upgrading existing stores. -->
+    <changeSet id="20261101-orders-column-types" author="kriolos" dbms="!sqlite">
+        <dropDefaultValue tableName="orders" columnName="qty"/>
+        <dropDefaultValue tableName="orders" columnName="displayid"/>
+        <modifyDataType tableName="orders" columnName="qty" newDataType="DOUBLE"/>
+        <modifyDataType tableName="orders" columnName="displayid" newDataType="VARCHAR(50)"/>
+        <addDefaultValue tableName="orders" columnName="qty" columnDataType="DOUBLE" defaultValueNumeric="1.0"/>
+        <addDefaultValue tableName="orders" columnName="displayid" columnDataType="VARCHAR(50)" defaultValue="1"/>
+    </changeSet>
+    <!-- SQLite cannot ALTER COLUMN TYPE. Rebuild only the legacy integer table. -->
+    <changeSet id="20261101-orders-column-types-sqlite" author="kriolos" dbms="sqlite">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1"><![CDATA[
+                SELECT CASE WHEN EXISTS (
+                    SELECT 1 FROM pragma_table_info('orders')
+                    WHERE lower(name) IN ('qty', 'displayid') AND upper(type) IN ('INT', 'INTEGER')
+                ) THEN 1 ELSE 0 END
+            ]]></sqlCheck>
+        </preConditions>
+        <sql><![CDATA[
+            CREATE TABLE orders_type_upgrade (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                orderid VARCHAR(50), qty DOUBLE DEFAULT 1.0, details VARCHAR(255),
+                attributes VARCHAR(255), notes VARCHAR(255), ticketid VARCHAR(50),
+                ordertime DATETIME NOT NULL, displayid VARCHAR(50) DEFAULT '1',
+                auxiliary INT, completetime DATETIME
+            );
+            INSERT INTO orders_type_upgrade
+                (id, orderid, qty, details, attributes, notes, ticketid, ordertime, displayid, auxiliary, completetime)
+            SELECT id, orderid, CAST(qty AS REAL), details, attributes, notes, ticketid,
+                   ordertime, CAST(displayid AS TEXT), auxiliary, completetime FROM orders;
+            UPDATE sqlite_sequence SET seq = MAX(seq, COALESCE(
+                (SELECT seq FROM sqlite_sequence WHERE name = 'orders'), 0))
+                WHERE name = 'orders_type_upgrade';
+            DROP TABLE orders;
+            ALTER TABLE orders_type_upgrade RENAME TO orders;
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

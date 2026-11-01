@@ -84,6 +84,10 @@ The product editor has a **Generate** button immediately to the right of Barcode
 
 ## More notes
 
+### Existing database orders checksum compatibility
+
+Upstream commit `0478bbdb` edited the already released orders-table changeset `1603928315936-19`, changing `qty` from INT to DOUBLE and `displayid` from INT to VARCHAR(50). Databases initialized before that change can reject startup with the recorded checksum `9:e9b9b069ca8f50a61072fc15f2b6b39d`. The original changeset now accepts that exact historical checksum; other unexpected checksums still fail validation. `db-changelog-orders-compatibility.xml` performs the actual column upgrade as a new migration, preserving rows and defaults. SQLite rebuilds only the legacy integer table, copying its rows and identity sequence; compatible SQLite tables are left in place. HSQLDB and SQLite upgrade/restart behavior is covered by `OrdersMigrationCompatibilityTest`. Run the updated application against the existing database; do not delete its files or clear all Liquibase checksums to resolve this error.
+
 ### Maintenance navigation and SQLite sale dates
 
 Maintenance views are cached. `JPanelTable` mounts its editor, scroll panes, navigation controls, and listeners only once, then reloads records on each activation. Rebuilding that component tree on every visit accumulated overlapping controls and left old viewports behind.
