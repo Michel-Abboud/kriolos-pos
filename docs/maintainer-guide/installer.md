@@ -1,10 +1,10 @@
 # Build and run on Windows
 
-The source/API baseline is Java 17 (`maven.compiler.release=17`); Maven accepts JDK 17 or newer. The Windows app image bundles the runtime from the JDK selected by `-JdkHome` or `JAVA_HOME`, so an image made with JDK 21 runs on its own Java 21 runtime. The current SQLite sales regression suite is tested on JDK 21. Source compatibility does not guarantee every optional database driver supports Java 17.
+The source/API baseline is Java 17 (`maven.compiler.release=17`); Maven accepts JDK 17 or newer. The Windows app image bundles the runtime from the JDK selected by `-JdkHome` or `JAVA_HOME`, so an image made with JDK 21 runs on its own Java 21 runtime. SQLite and HSQLDB startup, migrations and the headless app regression suite are tested on JDK 17. Some optional database drivers require newer Java; the app explicitly loads the selected embedded driver to avoid depending on discovery of unrelated drivers.
 
 ## Run a development checkout
 
-Install JDK 17 and use a local database or the default embedded HSQLDB. The easiest edit-compile-run loop is:
+Install JDK 17 and use a local database or the default embedded SQLite database. HSQLDB is also supported. The easiest edit-compile-run loop is:
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
@@ -21,9 +21,9 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
 & "$env:JAVA_HOME\bin\java.exe" --add-opens=java.desktop/java.beans=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED -jar .\kriolos-opos-app\target\kriolos-pos.jar
 ```
 
-The first launch writes `%APPDATA%\KriolOS\kriolos-opos.properties`. The default database URL points to a local HSQLDB file there; no database server is needed for basic development. The Configuration screen can change it. Use a separate Windows user or add `-Dkriolos.config=C:\path\to\scratch.properties` before `-jar` when testing against a throwaway database so you do not alter a working POS database. A GUI session is required.
+The first launch writes `%APPDATA%\KriolOS\kriolos-opos.properties`. The current default is `jdbc:sqlite:` followed by `%APPDATA%\KriolOS\kriolopos.db`; no database server is needed. The Configuration screen can change it. A missing embedded database is created on connection, then Liquibase initializes its tables, resources and default users. Deleting a database does not reset the properties file or restore old data. Use `-ConfigFile C:\path\to\scratch.properties` with the dev script, or `-Dpos.config.file=C:\path\to\scratch.properties` before `-jar`, to isolate experiments. A GUI session is required.
 
-The default HSQLDB is the recommended embedded option. A fresh database completed the app's full Liquibase migration and reopened successfully on JDK 17; see [HSQLDB verification and data location](hsqldb.md).
+SQLite and HSQLDB both support automatic creation and initialization. `EmbeddedDatabaseStartupTest` verifies a missing database, migration and reopening in separate Java processes without JDBC driver flags. Startup explicitly loads the selected embedded driver before the login connection test and Session connection, avoiding optional-driver discovery failures. See [HSQLDB configuration and data location](hsqldb.md).
 
 ## Build an installable MSI
 
@@ -36,7 +36,7 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
 
 The script automatically detects WiX in that standard directory when the current PowerShell window has not yet received the updated PATH.
 
-The MSI appears at `dist\windows\<timestamp>\kriolosPOS-1.0.0.msi`. The command wrapper runs the PowerShell script under a process-local execution policy, so it also works on PCs where direct `.ps1` execution is disabled. The script builds the app and dependencies, stages the jars, and invokes JDK `jpackage` to bundle a Java runtime and make a Start Menu shortcut. To repackage an already built checkout, pass `-SkipBuild`. Install the MSI on the other Windows PC; a separate Java installation is not needed there. User configuration and the default embedded HSQLDB live under that PC's `%APPDATA%\KriolOS` directory and are not copied into the installer. Transfer or restore data separately if needed.
+The MSI appears at `dist\windows\<timestamp>\kriolosPOS-1.0.0.msi`. The command wrapper runs the PowerShell script under a process-local execution policy, so it also works on PCs where direct `.ps1` execution is disabled. The script builds the app and dependencies, stages the jars, and invokes JDK `jpackage` to bundle a Java runtime and make a Start Menu shortcut. To repackage an already built checkout, pass `-SkipBuild`. Install the MSI on the other Windows PC; a separate Java installation is not needed there. User configuration and embedded databases live under that PC's `%APPDATA%\KriolOS` directory and are not copied into the installer. Transfer or restore data separately if needed.
 
 The repo also has a `kriolos-opos-jpackage` Maven module and release pipeline. The script is a direct, repeatable developer workflow that uses the app module's current `target/kriolos-pos.jar` and `target/lib` output.
 

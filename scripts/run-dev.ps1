@@ -41,7 +41,7 @@ if ($classes.Count -eq 0 -or $jars.Count -eq 0) {
 }
 
 $classpath = (($classes + $jars) -join [IO.Path]::PathSeparator)
-$javaArgs = @('-Djdbc.drivers=org.hsqldb.jdbc.JDBCDriver',
+$javaArgs = @('-Djdbc.drivers=org.hsqldb.jdbc.JDBCDriver:org.sqlite.JDBC',
     '--add-opens=java.desktop/java.beans=ALL-UNNAMED',
     '--add-opens=java.base/java.lang=ALL-UNNAMED',
     '--add-opens=java.base/java.io=ALL-UNNAMED',

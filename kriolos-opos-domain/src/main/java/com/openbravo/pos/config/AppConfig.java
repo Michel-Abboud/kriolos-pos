@@ -194,11 +194,14 @@ public class AppConfig extends LegacyBootstrapConfiguration implements AppProper
 
     private static void testConnection(String name, String url, String username, String password) throws BasicException {
         LOGGER.log(Level.INFO, "Testing database connection for ({0}): {1}", new Object[]{name, url});
-        try (Connection conn = DriverManager.getConnection(url, username, password)) {
-            if (conn == null || !conn.isValid(3)) {
-                throw new SQLException("Connection test returned invalid status for URL: " + url);
+        try {
+            com.openbravo.data.loader.JdbcDriverLoader.loadFor(url);
+            try (Connection conn = DriverManager.getConnection(url, username, password)) {
+                if (conn == null || !conn.isValid(3)) {
+                    throw new SQLException("Connection test returned invalid status for URL: " + url);
+                }
+                LOGGER.log(Level.INFO, "Database connection test successful (silent) for ({0})", url);
             }
-            LOGGER.log(Level.INFO, "Database connection test successful (silent) for ({0})", url);
         }
         catch (SQLException ex) {
             LOGGER.log(Level.WARNING, "Database connection test failed for DB " + url + ": " + ex.getMessage(), ex);

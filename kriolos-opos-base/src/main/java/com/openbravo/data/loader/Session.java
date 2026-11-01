@@ -263,7 +263,7 @@ public final class Session {
         }
 
         public Connection getConnection() throws SQLException {
-
+            JdbcDriverLoader.loadFor(m_surl);
             return (m_sappuser == null && m_spassword == null)
                     ? DriverManager.getConnection(m_surl)
                     : DriverManager.getConnection(m_surl, m_sappuser, m_spassword);

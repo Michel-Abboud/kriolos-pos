@@ -88,6 +88,6 @@ $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
 .\scripts\run-dev.cmd
 ```
 
-The first run packages the dependencies needed for the local runtime. Later runs only compile changed Java classes and launch `BootstrapPOS` directly from the reactor's `target\classes` directories. Edit a file, close the running POS window, and run the same command again. The script explicitly registers the bundled HSQLDB JDBC driver and uses the default embedded database. Pass `-ConfigFile C:\path\to\scratch.properties` when you want an isolated database configuration.
+The first run packages the dependencies needed for the local runtime. Later runs only compile changed Java classes and launch `BootstrapPOS` directly from the reactor's `target\classes` directories. Edit a file, close the running POS window, and run the same command again. The script explicitly registers both bundled SQLite and HSQLDB JDBC drivers and uses the configured database (SQLite by default). A missing embedded database is created and initialized automatically; no database server is needed. Pass `-ConfigFile C:\path\to\scratch.properties` when you want an isolated database configuration.
 
 Java class changes are loaded when the process starts, so a restart is expected. An installer is needed only when testing installation or distributing the app. The POM's optional HotSwap profile is not required by this workflow.
