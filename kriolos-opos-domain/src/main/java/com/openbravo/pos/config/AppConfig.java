@@ -280,6 +280,7 @@ enum ConfigProperty {
     MACHINE_IBUTTONRESPONSE("machine.iButtonResponse", "5"),
     MACHINE_UNIQUEINSTANCE("machine.uniqueinstance", "true"),
     // PAYMENT
+    PAYMENT_CASH_ONLY("payment.cashonly", "true"),
     PAYMENT_GATEWAY("payment.gateway", "external"),
     PAYMENT_MAGCARDREADER("payment.magcardreader", "Not defined"),
     PAYMENT_TESTMODE("payment.testmode", "true"),

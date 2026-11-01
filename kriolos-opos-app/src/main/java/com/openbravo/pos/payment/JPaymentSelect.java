@@ -263,6 +263,11 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
     }
 
     protected void addTabPayment(JPaymentCreator jpay) {
+        String cashOnly = app.getProperties() != null ? app.getProperties().getProperty("payment.cashonly") : null;
+        if (!"false".equalsIgnoreCase(cashOnly)
+                && !"payment.cash".equals(jpay.getKey()) && !"refund.cash".equals(jpay.getKey())) {
+            return;
+        }
         if (app.hasPermission(jpay.getKey())) {
 
             JPaymentInterface jpayinterface = payments.get(jpay.getKey());

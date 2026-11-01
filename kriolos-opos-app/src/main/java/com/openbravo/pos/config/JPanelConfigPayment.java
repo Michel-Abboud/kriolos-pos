@@ -33,6 +33,7 @@ public class JPanelConfigPayment extends javax.swing.JPanel implements PanelConf
     private final DirtyManager dirty = new DirtyManager();
     private final Map<String, PaymentConfiguration> paymentsName = new HashMap<>();
     private PaymentConfiguration paymentConfiguration;
+    private final javax.swing.JCheckBox cashOnly = new javax.swing.JCheckBox();
 
     /**
      * Creates new form JPanelConfigPayment
@@ -40,6 +41,11 @@ public class JPanelConfigPayment extends javax.swing.JPanel implements PanelConf
     public JPanelConfigPayment() {
 
         initComponents();
+        cashOnly.setText(AppLocal.getIntString("label.paymentcashonly"));
+        cashOnly.setName("kriolos:config:payment-cash-only");
+        cashOnly.addActionListener(dirty);
+        jPanel2.setLayout(new java.awt.BorderLayout());
+        jPanel2.add(cashOnly, java.awt.BorderLayout.NORTH);
 
         // dirty manager
         jcboCardReader.addActionListener(dirty);
@@ -89,6 +95,7 @@ public class JPanelConfigPayment extends javax.swing.JPanel implements PanelConf
         jcboCardReader.setSelectedItem(config.getProperty("payment.magcardreader"));
         jcboPaymentGateway.setSelectedItem(config.getProperty("payment.gateway"));
         jchkPaymentTest.setSelected(Boolean.parseBoolean(config.getProperty("payment.testmode")));
+        cashOnly.setSelected(!"false".equalsIgnoreCase(config.getProperty("payment.cashonly")));
         if (paymentConfiguration != null) {
             paymentConfiguration.loadProperties(config);
         }
@@ -105,6 +112,7 @@ public class JPanelConfigPayment extends javax.swing.JPanel implements PanelConf
         config.setProperty("payment.magcardreader", comboValue(jcboCardReader.getSelectedItem()));
         config.setProperty("payment.gateway", comboValue(jcboPaymentGateway.getSelectedItem()));
         config.setProperty("payment.testmode", Boolean.toString(jchkPaymentTest.isSelected()));
+        config.setProperty("payment.cashonly", Boolean.toString(cashOnly.isSelected()));
         if (paymentConfiguration != null) {
             paymentConfiguration.saveProperties(config);
         }
@@ -217,7 +225,8 @@ private void jcboPaymentGatewayActionPerformed(java.awt.event.ActionEvent evt) {
 
     if (paymentConfiguration != null) {
         jPanel2.removeAll();
-        jPanel2.add(paymentConfiguration.getComponent());
+        jPanel2.add(cashOnly, java.awt.BorderLayout.NORTH);
+        jPanel2.add(paymentConfiguration.getComponent(), java.awt.BorderLayout.CENTER);
         jPanel2.revalidate();
         jPanel2.repaint();
     }
