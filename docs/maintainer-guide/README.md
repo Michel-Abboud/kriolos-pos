@@ -33,7 +33,7 @@ The root `README.adoc` describes the fork history: KriolOS descends from uniCent
 
 ## Dual currency added here
 
-Open Configuration > Currencies. Enter three values: main ISO 4217 code, secondary ISO 4217 code, and the number of secondary units for one main unit. For example, `USD`, `LBP`, `90000`. The secondary code may be blank to disable conversion. The sale views show separate side by side totals labeled from the configured codes, such as `USD Total` and `LBP Total`. The conversion uses decimal arithmetic and the secondary currency's fraction digits. Existing prices, taxes, payments, cash totals, and saved tickets remain in the main currency; the secondary figure is informational and uses the current configured rate when displayed or reprinted.
+Open Configuration > Currencies. Enter three values: main ISO 4217 code, secondary ISO 4217 code, and the number of secondary units for one main unit. For example, `USD`, `LBP`, `90000`. The secondary code may be blank to disable conversion. The sale views show separate side by side totals labeled from the configured codes, such as `USD Total` and `LBP Total`. The conversion uses decimal arithmetic and the secondary currency's fraction digits. Prices, taxes, accounting payments, cash totals, and saved ticket totals remain in the main currency. Sales and reprint conversions use the current configured rate; cash checkout also accepts tender in both currencies as described below.
 
 In a `Printer.Ticket` resource, use `${ticket.printPrimaryTotal()}` and `${ticket.printSecondaryTotal()}`. The latter is empty when disabled. The older `${ticket.printTotal()}` remains valid and retains its original formatting. For example:
 
@@ -43,6 +43,16 @@ In a `Printer.Ticket` resource, use `${ticket.printPrimaryTotal()}` and `${ticke
 ```
 
 This is a display conversion. It does not lock a historical exchange rate into the sale; a reprint after a rate change uses the new rate.
+
+### Cash checkout in two currencies
+
+With a valid secondary currency configured, the payment header shows **Total USD / Remaining USD** on the first row and **Total LBP / Remaining LBP** below it (using the configured currency codes). Cash has separate **Given Primary** and **Given Secondary** fields. Both start empty. Click either field to select it for the POS keypad or keyboard; enter the amounts actually received. There is no assumed exact payment. Remaining updates live. Use **+** to commit a partial cash payment before choosing another payment method, or **OK** when the full balance is covered.
+
+`DualCurrencyCash` computes `primary given + secondary given / rate` with decimal arithmetic, then rounds the combined amount once to the main currency's fraction digits. The payment record stores applied total and tendered amount in the main currency, using the existing cash accounting and persistence paths. The rate is captured anew for each checkout. This does not add separate currency drawer ledgers or historical currency/rate fields to payments.
+
+The denomination buttons (50, 20, 10, etc.) are replaced by **Return:** with **Primary** and **Secondary** amounts. The primary return is the largest multiple of 5 that does not exceed the change; the remaining change is converted to the secondary currency. For example, with `USD / LBP / 90000`, a USD 13.20 sale paid with USD 10 plus LBP 900,000 counts as USD 20 given and returns **USD 5 + LBP 162,000**. Change smaller than USD 5 is returned entirely in LBP. The bill is not rounded to a multiple of 5.
+
+When secondary currency is disabled, the existing single-currency cash screen and its `payment.cash` denomination script remain available. Other payment methods keep taking accounting-currency amounts. Tests cover conversion and return splitting, partial and secondary-only cash entry, normalized payment persistence on HSQLDB/SQLite, and the two-row header. The rendered preview is `kriolos-opos-app/target/dual-currency-payment-preview.png`.
 
 ## Sales controls and editable resources
 

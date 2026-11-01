@@ -65,6 +65,9 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
     private final Map<String, JPaymentInterface> payments = new HashMap<>();
     private String m_sTransactionID;
     private static PaymentInfo returnPayment = null;
+    private com.openbravo.pos.ticket.DualCurrencyTotal paymentCurrency;
+    private final javax.swing.JLabel secondaryTotal = new javax.swing.JLabel();
+    private final javax.swing.JLabel secondaryRemaining = new javax.swing.JLabel();
 
     public static PaymentInfo getReturnPayment() {
         return returnPayment;
@@ -223,7 +226,8 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
         m_dTotal = total;
         this.customerext = customerext;
 
-        m_jTotalEuros.setText(Formats.CURRENCY.formatValue(m_dTotal));
+        configureCurrencySummary();
+        updateCurrencySummary(m_dTotal, m_dTotal);
 
         addTabs();
 
@@ -235,7 +239,7 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
             printState();
             modalContext = PosUIModal.create(parentComponent != null ? parentComponent : this, this)
                     .setTitle(getTitle())
-                    .setPreferredSize(new Dimension(800, 520))
+                    .setPreferredSize(paymentCurrency == null ? new Dimension(800, 520) : new Dimension(900, 600))
                     .setModal(true);
             modalContext.show();
         }
@@ -305,6 +309,10 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
 
         @Override
         public JPaymentInterface createJPayment() {
+            if (paymentCurrency != null) {
+                return new DualCurrencyCashPanel(JPaymentSelect.this, paymentCurrency,
+                        remaining -> updateCurrencySummary(m_dTotal, remaining.doubleValue()));
+            }
             return new JPaymentCashPos(JPaymentSelect.this, resourceService);
         }
 
@@ -600,9 +608,72 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
         }
     }
 
+    void configureCurrencySummary() {
+        paymentCurrency = PaymentCurrency.configured();
+        // Payment panes are otherwise cached; capture the current rate for each checkout.
+        payments.remove("payment.cash");
+        jPanel4.removeAll();
+        jPanel4.setLayout(new java.awt.BorderLayout(12, 0));
+        jPanel4.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        var summary = new javax.swing.JPanel(new java.awt.GridBagLayout());
+        m_jTotalEuros.setFont(m_jTotalEuros.getFont().deriveFont(20f));
+        m_jRemaininglEuros.setFont(m_jRemaininglEuros.getFont().deriveFont(20f));
+        m_jLblTotalEuros1.setFont(m_jLblTotalEuros1.getFont().deriveFont(16f));
+        m_jLblRemainingEuros.setFont(m_jLblRemainingEuros.getFont().deriveFont(16f));
+        m_jLblTotalEuros1.setText(paymentCurrency == null ? AppLocal.getIntString("label.totalcash")
+                : AppLocal.getIntString("payment.total.currency", paymentCurrency.primaryCode()));
+        m_jLblRemainingEuros.setText(paymentCurrency == null ? AppLocal.getIntString("label.remainingcash")
+                : AppLocal.getIntString("payment.remaining.currency", paymentCurrency.primaryCode()));
+        addSummaryRow(summary, 0, m_jLblTotalEuros1, m_jTotalEuros, m_jLblRemainingEuros, m_jRemaininglEuros);
+        if (paymentCurrency != null) {
+            for (var label : new javax.swing.JLabel[]{secondaryTotal, secondaryRemaining}) {
+                label.setFont(m_jTotalEuros.getFont());
+                label.setBorder(m_jTotalEuros.getBorder());
+                label.setOpaque(true);
+            }
+            secondaryTotal.setName("kriolos:payment:lbl-total-secondary");
+            secondaryRemaining.setName("kriolos:payment:lbl-remaining-secondary");
+            var totalTitle = new javax.swing.JLabel(AppLocal.getIntString("payment.total.currency", paymentCurrency.secondaryCode()));
+            var remainingTitle = new javax.swing.JLabel(AppLocal.getIntString("payment.remaining.currency", paymentCurrency.secondaryCode()));
+            totalTitle.setFont(m_jLblTotalEuros1.getFont());
+            remainingTitle.setFont(m_jLblRemainingEuros.getFont());
+            addSummaryRow(summary, 1, totalTitle, secondaryTotal, remainingTitle, secondaryRemaining);
+        }
+        var controls = new javax.swing.JPanel(new java.awt.GridLayout(1, 2, 6, 0));
+        controls.add(m_jButtonAdd); controls.add(m_jButtonRemove);
+        jPanel4.add(summary, java.awt.BorderLayout.CENTER);
+        jPanel4.add(controls, java.awt.BorderLayout.LINE_END);
+        setPreferredSize(paymentCurrency == null ? new Dimension(800, 520) : new Dimension(900, 600));
+        jPanel4.applyComponentOrientation(getComponentOrientation());
+        jPanel4.revalidate();
+    }
+
+    private static void addSummaryRow(javax.swing.JPanel panel, int row, javax.swing.JLabel... fields) {
+        for (int column = 0; column < fields.length; column++) {
+            var constraints = new java.awt.GridBagConstraints();
+            constraints.gridx = column; constraints.gridy = row;
+            constraints.insets = new java.awt.Insets(3, 0, 3, 10);
+            constraints.weightx = column % 2 == 1 ? 1 : 0;
+            constraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            if (column % 2 == 1) fields[column].setPreferredSize(new Dimension(180, 32));
+            panel.add(fields[column], constraints);
+        }
+    }
+
+    void updateCurrencySummary(double total, double remaining) {
+        if (paymentCurrency == null) {
+            m_jTotalEuros.setText(Formats.CURRENCY.formatValue(total));
+            m_jRemaininglEuros.setText(Formats.CURRENCY.formatValue(remaining));
+        } else {
+            m_jTotalEuros.setText(paymentCurrency.formatPrimary(total, java.util.Locale.getDefault()));
+            m_jRemaininglEuros.setText(paymentCurrency.formatPrimary(remaining, java.util.Locale.getDefault()));
+            secondaryTotal.setText(paymentCurrency.formatSecondary(total, java.util.Locale.getDefault()));
+            secondaryRemaining.setText(paymentCurrency.formatSecondary(remaining, java.util.Locale.getDefault()));
+        }
+    }
+
     private void printState() {
-        m_jRemaininglEuros.setText(Formats.CURRENCY.formatValue(
-                paymentService.calculateRemaining(m_aPaymentInfo, m_dTotal)));
+        updateCurrencySummary(m_dTotal, paymentService.calculateRemaining(m_aPaymentInfo, m_dTotal));
         m_jButtonRemove.setEnabled(!m_aPaymentInfo.isEmpty());
         m_jTabPayment.setSelectedIndex(0);
         ((JPaymentInterface) m_jTabPayment.getSelectedComponent())
@@ -845,19 +916,21 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
                     .activate(customerext,
                             paymentService.calculateRemaining(m_aPaymentInfo, m_dTotal),
                             m_sTransactionID);
-            m_jRemaininglEuros.setText(
-                    Formats.CURRENCY.formatValue(
-                            paymentService.calculateRemaining(m_aPaymentInfo, m_dTotal)));
+            // Cash activation updates the live remaining amount from both Given fields.
+            if (!(m_jTabPayment.getSelectedComponent() instanceof DualCurrencyCashPanel)) {
+                updateCurrencySummary(m_dTotal, paymentService.calculateRemaining(m_aPaymentInfo, m_dTotal));
+            }
         }
     }
 
     private void m_jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {
+        JPaymentInterface selected = (JPaymentInterface) m_jTabPayment.getSelectedComponent();
+        // Cash is already calculated on the EDT. Confirm the amount shown at click time.
+        PaymentInfo cashSnapshot = selected instanceof DualCurrencyCashPanel ? selected.executePayment() : null;
         SwingWorker<Object, Object> worker = new SwingWorker<>() {
             @Override
             protected Object doInBackground() throws Exception {
-                setReturnPayment(
-                        ((JPaymentInterface) m_jTabPayment.getSelectedComponent())
-                                .executePayment());
+                setReturnPayment(selected instanceof DualCurrencyCashPanel ? cashSnapshot : selected.executePayment());
                 return null;
             }
 
