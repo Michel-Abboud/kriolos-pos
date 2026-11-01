@@ -25,7 +25,7 @@ class DualCurrencyCashPanelTest {
             AtomicReference<BigDecimal> remaining = new AtomicReference<>();
             var panel = new DualCurrencyCashPanel(notifier, new DualCurrencyTotal("USD", "LBP", "90000"), remaining::set);
             panel.activate(null, 13.20, null);
-            verify(notifier).setStatus(false, false);
+            verify(notifier).setStatus(true, true);
             var primary = (JEditorDoublePositive) find(panel, "kriolos:payment:given-primary");
             var secondary = (JEditorDoublePositive) find(panel, "kriolos:payment:given-secondary");
             primary.setDoubleValue(10.0);
@@ -45,14 +45,30 @@ class DualCurrencyCashPanelTest {
             primary.setDoubleValue(5.0);
             assertEquals(5.0, panel.executePayment().getTotal());
             assertEquals(8.20, remaining.get().doubleValue());
-            // Secondary-only payment and reset must never retain a previous Given amount.
+            // Reopening defaults to exact primary tender, without retaining secondary cash.
             panel.activate(null, 13.20, null);
-            assertNull(primary.getValue());
+            assertEquals(13.20, primary.getValue());
             assertNull(secondary.getValue());
+            assertEquals(13.20, panel.executePayment().getPaid());
+            // Backspace on the actual keypad input clears only its selected editor.
+            var keyboard = findTextField(panel);
+            var backspace = new java.awt.event.KeyEvent(keyboard, java.awt.event.KeyEvent.KEY_TYPED,
+                    System.currentTimeMillis(), 0, java.awt.event.KeyEvent.VK_UNDEFINED, '\b');
+            for (var listener : keyboard.getKeyListeners()) listener.keyTyped(backspace);
+            assertNull(primary.getValue());
             assertNull(panel.executePayment());
+            assertEquals(13.20, remaining.get().doubleValue());
             secondary.setDoubleValue(1188000.0);
             assertEquals(13.20, panel.executePayment().getTotal());
             assertEquals(0, remaining.get().signum());
+            secondary.activate();
+            for (var listener : keyboard.getKeyListeners()) listener.keyTyped(backspace);
+            assertNull(secondary.getValue());
+            assertNull(panel.executePayment());
+            panel.activate(null, 8.20, null);
+            assertEquals(8.20, primary.getValue());
+            primary.typeChar('5');
+            assertEquals(5.0, primary.getValue());
         });
     }
 
@@ -106,6 +122,17 @@ class DualCurrencyCashPanelTest {
         for (Component child : container.getComponents()) {
             if (child instanceof Container nested) layout(nested);
         }
+    }
+
+    private static javax.swing.JTextField findTextField(Container parent) {
+        for (Component child : parent.getComponents()) {
+            if (child instanceof javax.swing.JTextField field) return field;
+            if (child instanceof Container container) {
+                var found = findTextField(container);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 
     private static Component find(Container parent, String name) {

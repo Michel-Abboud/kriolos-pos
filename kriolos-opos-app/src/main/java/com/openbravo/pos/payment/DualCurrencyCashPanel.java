@@ -44,6 +44,7 @@ public final class DualCurrencyCashPanel extends JPanel implements JPaymentInter
         setName("kriolos:payment:dual-cash");
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         var keys = new JEditorKeys();
+        keys.setBackspaceClears(true);
         keys.addActionListener(event -> {
             var root = javax.swing.SwingUtilities.getRootPane(this);
             if (root != null && root.getDefaultButton() != null && root.getDefaultButton().isEnabled()) {
@@ -109,6 +110,7 @@ public final class DualCurrencyCashPanel extends JPanel implements JPaymentInter
         due = currency.roundPrimary(BigDecimal.valueOf(total).max(BigDecimal.ZERO));
         resetting = true;
         primaryGiven.reset();
+        primaryGiven.setDoubleValue(due.doubleValue());
         secondaryGiven.reset();
         resetting = false;
         primaryGiven.activate();
@@ -144,4 +146,5 @@ public final class DualCurrencyCashPanel extends JPanel implements JPaymentInter
     }
 
     @Override public Component getComponent() { return this; }
+
 }

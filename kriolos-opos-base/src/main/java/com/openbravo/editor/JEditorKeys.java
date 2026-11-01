@@ -40,6 +40,12 @@ public class JEditorKeys extends javax.swing.JPanel implements EditorKeys {
     private char[] keysavailable;    
     private boolean m_bMinus;
     private boolean m_bKeyDot;
+    private boolean backspaceClears;
+
+    /** Opt in to treating keyboard Backspace as the on-screen CE key. */
+    public void setBackspaceClears(boolean enabled) {
+        backspaceClears = enabled;
+    }
 
     
     /** Creates new form JEditorKeys */
@@ -445,6 +451,7 @@ public class JEditorKeys extends javax.swing.JPanel implements EditorKeys {
             
             // solo lo lanzamos si esta dentro del set de teclas
             char c = evt.getKeyChar();
+            if (backspaceClears && c == '\b') c = '\u007f';
             // Enter is handled by the text field action, once for either Enter key.
             if (c != '\n' && c != '\r') {
                 if (keysavailable == null) {
