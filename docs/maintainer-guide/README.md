@@ -46,6 +46,8 @@ This is a display conversion. It does not lock a historical exchange rate into t
 
 ## Sales controls and editable resources
 
+Detailed catalog cards render a product's saved **Button HTML** directly; plain product/category names are escaped before being wrapped in HTML. Placeholder initials are extracted from the rendered text, with entities and tags removed, using Unicode characters. Do not HTML-escape a complete saved `<html>` document or derive initials from its raw markup: that exposes tags and produces initials such as `<>`. `ProductCardV2Test` covers both text paths, Arabic, images, prices and selection, and writes a preview to `kriolos-opos-app/target/catalog-cards-preview.png`.
+
 The divider below the classic sale totals resizes the product catalog. Its arrow controls can fully collapse and restore the catalog. **Hide status bar** collapses the separate bottom bar containing the database details, Exit, and current user; **Show status bar** restores it.
 
 Deleting the current sale or a selected line takes effect immediately. Role permissions still apply, line and sale removals are audited, and the optional supervisor PIN still applies to deleting a sale. Deleting a current sale also removes its suspended copy so it cannot return after switching screens.

@@ -12,6 +12,10 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,6 +24,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.html.HTMLEditorKit;
 
 /**
  * Modernized and highly configurable catalog card for POS terminals. Supports
@@ -31,6 +37,8 @@ import javax.swing.border.EmptyBorder;
 public class ProductCardV2 extends JButton {
 
     private static final long serialVersionUID = 1L;
+    private static final Pattern HTML_TITLE = Pattern.compile("(?is)^\\s*<html\\b[^>]*>");
+    private static final Pattern TITLE_WORD = Pattern.compile("[\\p{L}\\p{N}]+");
 
     /**
      * Card rendering modes.
@@ -223,6 +231,7 @@ public class ProductCardV2 extends JButton {
 
         // 1. Center Image or Text Placeholder
         JLabel imageLabel = new JLabel();
+        imageLabel.setName("kriolos:catalog:card-image");
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setVerticalAlignment(SwingConstants.CENTER);
 
@@ -242,7 +251,8 @@ public class ProductCardV2 extends JButton {
         JPanel textPanel = new JPanel(new BorderLayout(0, 2));
         textPanel.setOpaque(false);
 
-        JLabel nameLabel = new JLabel("<html><center>" + sanitizeHtml(item.getText()) + "</center></html>", SwingConstants.CENTER);
+        JLabel nameLabel = new JLabel(formatTitle(item.getText()), SwingConstants.CENTER);
+        nameLabel.setName("kriolos:catalog:card-title");
         nameLabel.setFont(config.titleFont());
         textPanel.add(nameLabel, BorderLayout.CENTER);
 
@@ -282,14 +292,36 @@ public class ProductCardV2 extends JButton {
     }
 
     private String extractInitials(String title) {
-        if (title == null || title.isBlank()) {
-            return "POS";
+        String visibleText = title == null ? "" : title;
+        if (HTML_TITLE.matcher(visibleText).find()) {
+            HTMLEditorKit kit = new HTMLEditorKit();
+            var document = kit.createDefaultDocument();
+            try {
+                kit.read(new StringReader(visibleText), document, 0);
+                visibleText = document.getText(0, document.getLength());
+            } catch (IOException | BadLocationException ex) {
+                return "POS";
+            }
         }
-        String[] words = title.trim().split("\\s+");
-        if (words.length == 1) {
-            return words[0].substring(0, Math.min(2, words[0].length())).toUpperCase();
+        var words = TITLE_WORD.matcher(visibleText);
+        if (!words.find()) return "POS";
+        String first = words.group();
+        if (words.find()) {
+            return (firstCodePoints(first, 1) + firstCodePoints(words.group(), 1)).toUpperCase(Locale.ROOT);
         }
-        return ("" + words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+        return firstCodePoints(first, 2).toUpperCase(Locale.ROOT);
+    }
+
+    private static String firstCodePoints(String text, int count) {
+        return text.substring(0, text.offsetByCodePoints(0, Math.min(count, text.codePointCount(0, text.length()))));
+    }
+
+    private String formatTitle(String text) {
+        // Product Button HTML is already a Swing HTML document. Escaping it
+        // made its tags visible; wrapping it again would nest HTML documents.
+        if (text != null && HTML_TITLE.matcher(text).find()) return text.stripLeading();
+        return "<html><center>" + sanitizeHtml(text).replace("\r\n", "\n").replace("\n", "<br>")
+                + "</center></html>";
     }
 
     private String sanitizeHtml(String text) {
