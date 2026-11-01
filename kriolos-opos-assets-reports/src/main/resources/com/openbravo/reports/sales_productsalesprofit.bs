@@ -48,9 +48,8 @@ report.setSentence("SELECT " +
 report.addParameter("RECEIPTS.DATENEW");
 report.addParameter("RECEIPTS.DATENEW");
 paramdates = new com.openbravo.pos.reports.JParamsDatesInterval();
-paramdates.setStartDate(com.openbravo.beans.DateUtils.getToday());
-// JG - 8 Jan 14 paramdates.setEndDate(com.openbravo.beans.DateUtils.getToday());
-paramdates.setEndDate(com.openbravo.beans.DateUtils.getTodayMinutes());
+paramdates.setToday();
+
 report.addQBFFilter(paramdates);
 
 report.addParameter("products.NAME");

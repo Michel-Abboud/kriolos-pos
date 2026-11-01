@@ -173,6 +173,7 @@ public class JTicketsFinderPanel extends JPanel implements EditorCreator {
                 jLblTicketCount.setText(count);
             }
         } catch (BasicException e) {
+            new MessageInf(MessageInf.SGN_WARNING, AppLocal.getIntString("message.cannotloadticket"), e).show(this);
         }
     }
 

@@ -99,12 +99,6 @@ public class TicketLineController {
             return false;
         }
 
-        int input = JMessagePanel.showConfirmDialog(parent,
-                new MessageInf(MessageInf.SGN_WARNING, AppLocal.getIntString("message.deletelineyes")));
-        if (input != 0) {
-            return false;
-        }
-
         return executeLineRemovalAndAudit(ticket, lineIndex);
     }
 
@@ -183,8 +177,8 @@ public class TicketLineController {
 
         boolean shouldRemove = isRefund ? (newline.getMultiply() >= 0.0) : (newline.getMultiply() <= 0.0);
         if (shouldRemove) {
-            deleteLineWithAudit(parent, ticket, lineIndex);
-            return LineChangeResult.removed();
+            return deleteLineWithAudit(parent, ticket, lineIndex)
+                    ? LineChangeResult.removed() : LineChangeResult.denied();
         }
 
         return LineChangeResult.updated(newline);

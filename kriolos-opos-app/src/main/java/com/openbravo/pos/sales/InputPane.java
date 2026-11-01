@@ -224,6 +224,10 @@ public class InputPane extends JPanel {
         keyFactory.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                // JTextField's action handles Enter; forwarding its typed event would submit twice.
+                if (e.getKeyChar() == '\n' || e.getKeyChar() == '\r') {
+                    return;
+                }
                 keyFactory.setText(null);
                 if (listener != null) {
                     listener.accept(e.getKeyChar());

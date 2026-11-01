@@ -55,6 +55,7 @@ import com.openbravo.pos.spi.config.BootstrapConfig.DatabaseConfig;
 import com.openbravo.pos.spi.hardware.scale.ScaleException;
 import java.awt.CardLayout;
 import java.awt.ComponentOrientation;
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.io.*;
 import java.sql.SQLException;
@@ -115,10 +116,30 @@ public class ApplicationShell extends JPanel implements AppView {
                 javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         workspaceScroll.setBorder(null);
         add(workspaceScroll, java.awt.BorderLayout.CENTER);
+        installStatusBarToggle();
         setName("kriolos:app:shell");
         this.bootstrapConfig = config;
         this.appProperties = config;
         remove(topPanel); //Occupie spaces
+    }
+
+    private void installStatusBarToggle() {
+        remove(statusBarPanel);
+        javax.swing.JPanel footer = new javax.swing.JPanel(new BorderLayout());
+        javax.swing.JButton toggle = new javax.swing.JButton(AppLocal.getIntString("button.statusbar.hide"));
+        toggle.setName("kriolos:app:toggle-status-bar");
+        toggle.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        toggle.setMargin(new java.awt.Insets(1, 8, 1, 8));
+        toggle.addActionListener(event -> {
+            boolean visible = !statusBarPanel.isVisible();
+            statusBarPanel.setVisible(visible);
+            toggle.setText(AppLocal.getIntString(visible ? "button.statusbar.hide" : "button.statusbar.show"));
+            footer.revalidate();
+            footer.repaint();
+        });
+        footer.add(toggle, BorderLayout.NORTH);
+        footer.add(statusBarPanel, BorderLayout.CENTER);
+        add(footer, BorderLayout.SOUTH);
     }
 
     public BootstrapConfig getBootstrapConfig() {

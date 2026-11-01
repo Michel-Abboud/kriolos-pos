@@ -33,6 +33,10 @@ public abstract class DataWriteUtils {
      * immutable and safe for concurrent use by multiple threads.
      */
     private final static DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+    static String formatTimestamp(Date value) {
+        return DATETIME_FORMAT.format(value.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+    }
     
     
     private final static DateTimeFormatter SQL_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:MM:SS");

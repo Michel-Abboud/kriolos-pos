@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <!-- SQLite JDBC previously wrote milliseconds into TEXT datetime columns.
+         Match the local-time format used by static SQL filters and new writes.
+         ISO dates and NULLs are left untouched; preserve millisecond precision. -->
+    <changeSet id="20261031-sqlite-timestamps" author="kriolos" dbms="sqlite">
+        <sql>
+            UPDATE closedcash SET datestart = strftime('%Y-%m-%d %H:%M:%f', CAST(datestart AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(datestart) IN ('integer', 'real')
+                OR (typeof(datestart) = 'text' AND length(datestart) BETWEEN 1 AND 14
+                    AND datestart NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(datestart AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE closedcash SET dateend = strftime('%Y-%m-%d %H:%M:%f', CAST(dateend AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(dateend) IN ('integer', 'real')
+                OR (typeof(dateend) = 'text' AND length(dateend) BETWEEN 1 AND 14
+                    AND dateend NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(dateend AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE customers SET curdate = strftime('%Y-%m-%d %H:%M:%f', CAST(curdate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(curdate) IN ('integer', 'real')
+                OR (typeof(curdate) = 'text' AND length(curdate) BETWEEN 1 AND 14
+                    AND curdate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(curdate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE customers SET memodate = strftime('%Y-%m-%d %H:%M:%f', CAST(memodate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(memodate) IN ('integer', 'real')
+                OR (typeof(memodate) = 'text' AND length(memodate) BETWEEN 1 AND 14
+                    AND memodate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(memodate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE draweropened SET opendate = strftime('%Y-%m-%d %H:%M:%f', CAST(opendate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(opendate) IN ('integer', 'real')
+                OR (typeof(opendate) = 'text' AND length(opendate) BETWEEN 1 AND 14
+                    AND opendate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(opendate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE leaves SET startdate = strftime('%Y-%m-%d %H:%M:%f', CAST(startdate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(startdate) IN ('integer', 'real')
+                OR (typeof(startdate) = 'text' AND length(startdate) BETWEEN 1 AND 14
+                    AND startdate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(startdate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE leaves SET enddate = strftime('%Y-%m-%d %H:%M:%f', CAST(enddate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(enddate) IN ('integer', 'real')
+                OR (typeof(enddate) = 'text' AND length(enddate) BETWEEN 1 AND 14
+                    AND enddate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(enddate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE lineremoved SET removeddate = strftime('%Y-%m-%d %H:%M:%f', CAST(removeddate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(removeddate) IN ('integer', 'real')
+                OR (typeof(removeddate) = 'text' AND length(removeddate) BETWEEN 1 AND 14
+                    AND removeddate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(removeddate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE orders SET ordertime = strftime('%Y-%m-%d %H:%M:%f', CAST(ordertime AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(ordertime) IN ('integer', 'real')
+                OR (typeof(ordertime) = 'text' AND length(ordertime) BETWEEN 1 AND 14
+                    AND ordertime NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(ordertime AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE orders SET completetime = strftime('%Y-%m-%d %H:%M:%f', CAST(completetime AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(completetime) IN ('integer', 'real')
+                OR (typeof(completetime) = 'text' AND length(completetime) BETWEEN 1 AND 14
+                    AND completetime NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(completetime AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE products SET memodate = strftime('%Y-%m-%d %H:%M:%f', CAST(memodate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(memodate) IN ('integer', 'real')
+                OR (typeof(memodate) = 'text' AND length(memodate) BETWEEN 1 AND 14
+                    AND memodate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(memodate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE receipts SET datenew = strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(datenew) IN ('integer', 'real')
+                OR (typeof(datenew) = 'text' AND length(datenew) BETWEEN 1 AND 14
+                    AND datenew NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE reservations SET created = strftime('%Y-%m-%d %H:%M:%f', CAST(created AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(created) IN ('integer', 'real')
+                OR (typeof(created) = 'text' AND length(created) BETWEEN 1 AND 14
+                    AND created NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(created AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE reservations SET datenew = strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(datenew) IN ('integer', 'real')
+                OR (typeof(datenew) = 'text' AND length(datenew) BETWEEN 1 AND 14
+                    AND datenew NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE shift_breaks SET starttime = strftime('%Y-%m-%d %H:%M:%f', CAST(starttime AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(starttime) IN ('integer', 'real')
+                OR (typeof(starttime) = 'text' AND length(starttime) BETWEEN 1 AND 14
+                    AND starttime NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(starttime AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE shift_breaks SET endtime = strftime('%Y-%m-%d %H:%M:%f', CAST(endtime AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(endtime) IN ('integer', 'real')
+                OR (typeof(endtime) = 'text' AND length(endtime) BETWEEN 1 AND 14
+                    AND endtime NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(endtime AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE shifts SET startshift = strftime('%Y-%m-%d %H:%M:%f', CAST(startshift AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(startshift) IN ('integer', 'real')
+                OR (typeof(startshift) = 'text' AND length(startshift) BETWEEN 1 AND 14
+                    AND startshift NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(startshift AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE shifts SET endshift = strftime('%Y-%m-%d %H:%M:%f', CAST(endshift AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(endshift) IN ('integer', 'real')
+                OR (typeof(endshift) = 'text' AND length(endshift) BETWEEN 1 AND 14
+                    AND endshift NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(endshift AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE stockdiary SET datenew = strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(datenew) IN ('integer', 'real')
+                OR (typeof(datenew) = 'text' AND length(datenew) BETWEEN 1 AND 14
+                    AND datenew NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(datenew AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE suppliers SET curdate = strftime('%Y-%m-%d %H:%M:%f', CAST(curdate AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(curdate) IN ('integer', 'real')
+                OR (typeof(curdate) = 'text' AND length(curdate) BETWEEN 1 AND 14
+                    AND curdate NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(curdate AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE config_properties SET created_at = strftime('%Y-%m-%d %H:%M:%f', CAST(created_at AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(created_at) IN ('integer', 'real')
+                OR (typeof(created_at) = 'text' AND length(created_at) BETWEEN 1 AND 14
+                    AND created_at NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(created_at AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+            UPDATE config_properties SET updated_at = strftime('%Y-%m-%d %H:%M:%f', CAST(updated_at AS REAL) / 1000.0, 'unixepoch', 'localtime')
+            WHERE (typeof(updated_at) IN ('integer', 'real')
+                OR (typeof(updated_at) = 'text' AND length(updated_at) BETWEEN 1 AND 14
+                    AND updated_at NOT GLOB '*[^0-9]*'))
+              AND strftime('%Y-%m-%d %H:%M:%f', CAST(updated_at AS REAL) / 1000.0, 'unixepoch', 'localtime') IS NOT NULL;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

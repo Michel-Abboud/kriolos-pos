@@ -107,6 +107,7 @@ public class JTicketsBagShared extends JTicketsBag {
         initComponents();
 
         m_jReprintTickets.setVisible(true);
+        m_jDelTicket.setName("kriolos:sales:delete-sale");
 
         LOGGER.log(System.Logger.Level.INFO, "JTicketsBagShared ");
     }
@@ -141,8 +142,25 @@ public class JTicketsBagShared extends JTicketsBag {
     @Override
     public void deleteTicket() {
 
-        auditService.addTicketDeleted(m_App.getAppUserView().getUser().getName());
-        updateCount();
+        TicketInfo activeTicket = m_panelticket.getActiveTicket();
+        if (activeTicket == null) {
+            updateCount();
+            return;
+        }
+        try {
+            if (dlReceipts != null) {
+                dlReceipts.deleteSharedTicket(activeTicket.getId());
+            }
+            if (auditService != null && m_App.getAppUserView() != null
+                    && m_App.getAppUserView().getUser() != null) {
+                auditService.addTicketDeleted(m_App.getAppUserView().getUser().getName());
+            }
+            m_panelticket.setActiveTicket(new TicketInfo(), null);
+            updateCount();
+        } catch (BasicException ex) {
+            LOGGER.log(System.Logger.Level.WARNING, "Could not delete current sale", ex);
+            new MessageInf(ex).show(this);
+        }
     }
 
     public void updateCount() {
@@ -462,31 +480,21 @@ public class JTicketsBagShared extends JTicketsBag {
 
     private void m_jDelTicketActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m_jDelTicketActionPerformed
 
-        boolean pinOK = false;
-
-        if (m_panelticket.getActiveTicket() != null) {
-
-            if (m_App.getProperties().getProperty("override.check").equals("true")) {
-                String pin = m_App.getProperties().getProperty("override.pin");
-                String iValue = JPasswordPanel.show(this, AppLocal.getIntString("title.override.enterpin"));
-
-                if (iValue != null && iValue.equals(pin)) {
-                    pinOK = true;
-                    int res = JOptionPane.showConfirmDialog(this,
-                            AppLocal.getIntString("message.wannadelete"),
-                            AppLocal.getIntString("title.editor"),
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE);
-
-                    if (res == JOptionPane.YES_OPTION) {
-                        deleteTicket();
-                    }
-                } else {
-                    pinOK = false;
-                    JOptionPane.showMessageDialog(this, AppLocal.getIntString("message.override.badpin"));
-                }
+        if (m_panelticket.getActiveTicket() == null || !m_App.hasPermission("sales.DeleteTicket")) {
+            return;
+        }
+        if (Boolean.parseBoolean(m_App.getProperties().getProperty("override.check"))) {
+            String pin = m_App.getProperties().getProperty("override.pin");
+            String entered = JPasswordPanel.show(this, AppLocal.getIntString("title.override.enterpin"));
+            if (entered == null) {
+                return;
+            }
+            if (!entered.equals(pin)) {
+                JOptionPane.showMessageDialog(this, AppLocal.getIntString("message.override.badpin"));
+                return;
             }
         }
+        deleteTicket();
 
     }//GEN-LAST:event_m_jDelTicketActionPerformed
 

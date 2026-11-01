@@ -1,5 +1,7 @@
 # Build and run on Windows
 
+The source/API baseline is Java 17 (`maven.compiler.release=17`); Maven accepts JDK 17 or newer. The Windows app image bundles the runtime from the JDK selected by `-JdkHome` or `JAVA_HOME`, so an image made with JDK 21 runs on its own Java 21 runtime. The current SQLite sales regression suite is tested on JDK 21. Source compatibility does not guarantee every optional database driver supports Java 17.
+
 ## Run a development checkout
 
 Install JDK 17 and use a local database or the default embedded HSQLDB. The easiest edit-compile-run loop is:

@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.logging.Level;
@@ -105,11 +104,7 @@ public final class PreparedSentenceDataWrite implements DataWrite {
     @Override
     public void setTimestamp(int paramIndex, Date value) throws BasicException {
         try {
-            if (value == null) {
-                this.m_ps.setNull(paramIndex, Types.TIMESTAMP);
-            } else {
-                this.m_ps.setTimestamp(paramIndex, new Timestamp(value.getTime()));
-            }
+            JdbcTimestamp.bind(m_ps, paramIndex, value);
         } catch (SQLException ex) {
             LOGGER.log(Level.WARNING, "Exception", ex);
             throw new BasicException(ex);

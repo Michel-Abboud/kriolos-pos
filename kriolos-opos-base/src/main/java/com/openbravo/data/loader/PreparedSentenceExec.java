@@ -21,7 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 
@@ -108,7 +107,8 @@ public class PreparedSentenceExec<W extends Object, T> extends JDBCBaseSentence<
                 }
 
                 rowsAffected = preparedStatement.executeUpdate();
-                preparedStatement.getConnection().commit();
+                // The enclosing Transaction owns commit/rollback. Outside a
+                // transaction JDBC auto-commit already persists this statement.
             } catch (SQLException sqlex) {
                 LOGGER.log(System.Logger.Level.WARNING, "Exception while execute SQL: " + sql, sqlex);
                 throw new BasicException(sqlex);
@@ -283,11 +283,7 @@ public class PreparedSentenceExec<W extends Object, T> extends JDBCBaseSentence<
                     preparedStatement.setBoolean(paramPosi, (Boolean) obj);
                 }
             } else if (da.getClassValue() == Date.class) {
-                if (obj == null) {
-                    preparedStatement.setNull(paramPosi, Types.TIMESTAMP);
-                } else {
-                    preparedStatement.setTimestamp(paramPosi, new Timestamp(((Date) obj).getTime()));
-                }
+                JdbcTimestamp.bind(preparedStatement, paramPosi, (Date) obj);
             } else if (da.getClassValue() == byte[].class) {
                 if (obj == null) {
                     preparedStatement.setNull(paramPosi, Types.BINARY);

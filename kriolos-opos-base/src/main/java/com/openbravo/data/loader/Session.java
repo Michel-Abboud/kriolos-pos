@@ -55,9 +55,8 @@ public final class Session {
         mConnection = null;
         isTransactionBegin = false;
 
+        connect(); // driver detection must reuse this connection
         DB = getSessionDBDriver();
-
-        connect(); // no lazy connection
     }
 
     public Session(DataSource ds) throws SQLException {
@@ -71,9 +70,8 @@ public final class Session {
         mConnection = null;
         isTransactionBegin = false;
 
+        connect(); // driver detection must reuse this connection
         DB = getSessionDBDriver();
-
-        connect(); // no lazy connection
     }
 
     /**

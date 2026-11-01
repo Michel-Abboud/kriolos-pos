@@ -38,8 +38,7 @@ report.addParameter("receipts.DATENEW");
 
 paramdates = new com.openbravo.pos.reports.JParamsDatesInterval();
 
-paramdates.setStartDate(com.openbravo.beans.DateUtils.getToday());
-paramdates.setEndDate(com.openbravo.beans.DateUtils.getTodayMinutes());
+paramdates.setToday();
 
 report.addQBFFilter(paramdates);
 

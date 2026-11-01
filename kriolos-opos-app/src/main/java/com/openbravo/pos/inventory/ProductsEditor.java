@@ -114,6 +114,9 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         dataLogicPIM = (catalogService instanceof DataLogicPIM) ? (DataLogicPIM) catalogService : null;
 
         initComponents();
+        jBtnGenerateBarcode.setName("kriolos:products:generate-barcode");
+        m_jCode.setName("kriolos:products:barcode");
+        m_jCodetype.setName("kriolos:products:barcode-type");
         
         m_CategoryModel = new ComboBoxValModel();
         taxcatmodel = new ComboBoxValModel();
@@ -683,7 +686,7 @@ public final class ProductsEditor extends com.openbravo.pos.panels.ValidationPan
         try {
             for (int attempt = 0; attempt < BARCODE_GENERATION_ATTEMPTS; attempt++) {
                 String candidate = Ean13BarcodeGenerator.generate();
-                if (dataLogicPIM.getProductInfoByCode(candidate) == null) {
+                if (catalogService.getProductInfoByCode(candidate) == null) {
                     m_jCode.setText(candidate);
                     m_jCodetype.setSelectedItem("EAN-13");
                     m_jCode.requestFocusInWindow();

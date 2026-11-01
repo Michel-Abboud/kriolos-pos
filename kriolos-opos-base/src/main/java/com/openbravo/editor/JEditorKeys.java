@@ -45,6 +45,11 @@ public class JEditorKeys extends javax.swing.JPanel implements EditorKeys {
     /** Creates new form JEditorKeys */
     public JEditorKeys() {
         initComponents();
+        m_txtKeys.addActionListener(event -> {
+            if (editorcurrent != null) {
+                fireActionPerformed();
+            }
+        });
         
         m_jKey0.addActionListener(new MyKeyNumberListener('0'));
         m_jKey1.addActionListener(new MyKeyNumberListener('1'));
@@ -440,9 +445,8 @@ public class JEditorKeys extends javax.swing.JPanel implements EditorKeys {
             
             // solo lo lanzamos si esta dentro del set de teclas
             char c = evt.getKeyChar();
-            if (c == '\n') {
-                fireActionPerformed();
-            } else {
+            // Enter is handled by the text field action, once for either Enter key.
+            if (c != '\n' && c != '\r') {
                 if (keysavailable == null) {
                     // todo disponible
                     editorcurrent.typeChar(c);

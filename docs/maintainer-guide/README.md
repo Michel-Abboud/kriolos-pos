@@ -44,11 +44,45 @@ In a `Printer.Ticket` resource, use `${ticket.printPrimaryTotal()}` and `${ticke
 
 This is a display conversion. It does not lock a historical exchange rate into the sale; a reprint after a rate change uses the new rate.
 
+## Sales controls and editable resources
+
+The divider below the classic sale totals resizes the product catalog. Its arrow controls can fully collapse and restore the catalog. **Hide status bar** collapses the separate bottom bar containing the database details, Exit, and current user; **Show status bar** restores it.
+
+Deleting the current sale or a selected line takes effect immediately. Role permissions still apply, line and sale removals are audited, and the optional supervisor PIN still applies to deleting a sale. Deleting a current sale also removes its suspended copy so it cannot return after switching screens.
+
+Configuration > Ticket Setup > **Receipt Print Off** sets the initial checkout printer state. When checked, the printer starts off in classic and both modern sales layouts. The cashier can still turn it on for an individual receipt. In classic sales, `Ticket.Buttons` can also set `<printselected value="false"/>` to start with printing off. Configuration changes require a restart.
+
+The Resources screen edits entries in the current database: `Printer.Ticket` and other `Printer.*` receipt templates, `Menu.Root`, `Ticket.Buttons`, and `script.*` scripts. It is not a general editor for all application text or Swing layouts. Login prompts, status messages, and most screen labels come from `pos_messages.properties` and the language bundles; changing those requires rebuilding the application. Configuration > Language & Region selects the language. Existing database resources are preserved when installing a new build, so edit those resources in the running application when customizing an existing store.
+
+## Startup screen text and images
+
+The default login and database-status labels are in English. To customize the initial screen:
+
+| What to change | Where to edit |
+| --- | --- |
+| Central welcome text and license panel | The HTML text block in `kriolos-opos-app/src/main/java/com/openbravo/pos/forms/components/CopyrightPanel.java` |
+| Logo at the top of the login screen | `kriolos-opos-assets-image/src/main/resources/com/openbravo/images/logo_100×100.png`, referenced by `AuthenticationPanel.java` |
+| Login heading and database/status prompts | `kriolos-opos-app/src/main/resources/pos_messages.properties`, including `JAuthPanel.m_LoginLabel.text`, `button.activate`, and `label.database.*`; translated labels live in the language modules |
+| User names and user pictures | Maintenance > Users in the running application |
+| Database names in the selector | Configuration > Database |
+
+Source text and logo changes require a new build: run `scripts/build-windows-installer.cmd -ImageOnly` and launch the newly generated app. The Resources screen does not override the central welcome panel or login logo.
+
+Enter submits password/text prompts. In classic sales, Enter opens checkout when no barcode is pending; with a pending barcode, it adds or looks up that product. The on-screen barcode button keeps its barcode-only action. Checkout permissions and the payment confirmation step still apply.
+
 ## Product barcode generation
 
-The product editor has a **Generate** button immediately to the right of Barcode Type. It creates a 13-digit value with the internal-use `200` prefix, calculates the EAN-13 check digit, and queries `DataLogicPIM.getProductInfoByCode()` before filling the Barcode field. A collision generates another candidate, up to 100 attempts. The button also selects the `EAN-13` barcode type. The existing unique index `products_inx_1` on `products.code` remains the final protection against concurrent duplicates at save time. The checksum implementation and tests are in `Ean13BarcodeGenerator`; the lookup remains in `ProductsEditor` because the domain generator has no database dependency.
+The product editor has a **Generate** button immediately to the right of Barcode Type. It creates a 13-digit value with the internal-use `200` prefix, calculates the EAN-13 check digit, and queries `CatalogService.getProductInfoByCode()` against the active store before filling the Barcode field. A collision generates another candidate, up to 100 attempts. The button also selects the `EAN-13` barcode type. The existing unique index `products_inx_1` on `products.code` remains the final protection against concurrent duplicates at save time. The checksum implementation and tests are in `Ean13BarcodeGenerator`; the lookup remains in `ProductsEditor` because the domain generator has no database dependency.
 
 ## More notes
+
+### Maintenance navigation and SQLite sale dates
+
+Maintenance views are cached. `JPanelTable` mounts its editor, scroll panes, navigation controls, and listeners only once, then reloads records on each activation. Rebuilding that component tree on every visit accumulated overlapping controls and left old viewports behind.
+
+SQLite datetime columns use formatted local-time text (`yyyy-MM-dd HH:mm:ss.SSS`), matching static SQL report filters. Both prepared timestamp writers use the same format through `JdbcTimestamp`. The SQLite-only `20261031-sqlite-timestamps` migration converts earlier epoch-millisecond values, including receipt and inventory dates, while leaving formatted dates and NULLs intact. This repair runs at the next database startup. `SQLiteSalesPersistenceTest` covers save/search/load/report, inventory and taxes, restart, legacy-date repair, and rollback after a payment failure. Statements must leave commit/rollback to the enclosing `Transaction`; committing an individual payment or status update can leave a partial sale. `Session` opens one connection and reuses it for driver detection.
+
+Sales report scripts use `JParamsDatesInterval.setToday()` for a full-day default, from today's midnight inclusive to tomorrow's midnight exclusive. The default refreshes when revisiting on a later day; manually edited date ranges are preserved. An end time fixed to the minute the report was first opened would hide later sales. Closed Cash and reports grouped by `closedcash.DATEEND` still require a closed cash session.
 
 ### Import categories from CSV
 
@@ -65,5 +99,4 @@ Supported fields are ID, Name, Parent, Text tip, Show name, Catalog order, Catal
 - [Build and run on Windows](installer.md)
 - [Architecture and change checklist](architecture.md)
 - [Embedded HSQLDB for development and installs](hsqldb.md)
-- [Embedded Derby status and restoration plan](derby.md)
 - Existing [development guide](../modules/guide-devel/pages/index.adoc) and [database overview](../modules/guide-devel/pages/database-overview.adoc)

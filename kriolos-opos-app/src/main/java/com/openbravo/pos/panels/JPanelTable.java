@@ -64,11 +64,12 @@ public abstract class JPanelTable extends JPanel implements JPanelView, BeanFact
     }
 
     private void startNavigation() {
-
-        if (bd == null) {
-            // init browsable editable data
-            bd = new BrowsableEditableData(getListProvider(), getSaveProvider(), getEditor(), dirty);
+        // Views are cached and activated again whenever the user returns.
+        // Mount the editor and listeners once; activate() still reloads data.
+        if (bd != null) {
+            return;
         }
+        bd = new BrowsableEditableData(getListProvider(), getSaveProvider(), getEditor(), dirty);
 
         // Add the filter panel
         Component c = getFilter();
@@ -124,6 +125,8 @@ public abstract class JPanelTable extends JPanel implements JPanelView, BeanFact
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         toolbarScroll.setBorder(null);
         container.add(toolbarScroll, BorderLayout.NORTH);
+        revalidate();
+        repaint();
     }
 
     public Component getToolbarExtras() {

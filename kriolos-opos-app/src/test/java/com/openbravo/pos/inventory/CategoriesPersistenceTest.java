@@ -34,6 +34,20 @@ class CategoriesPersistenceTest {
             };
             assertEquals(1, new DefaultSaveProvider(pim.getTableCategories()).insertData(category));
             assertEquals("Saved Category", categoryName(session));
+            pim.createCategory(new Object[]{"image-only-category", "Image category", false});
+            var imageCategory = pim.getRootCategories().stream()
+                    .filter(item -> "image-only-category".equals(item.getID())).findFirst().orElseThrow();
+            assertEquals(false, imageCategory.getCatShowName(), "hiding a name must not hide its category");
+            assertEquals(true, imageCategory.getCatalogEnabled(), "new imported categories must enter the catalog");
+            new DefaultSaveProvider(pim.getTableCategories()).insertData(new Object[]{
+                "disabled-category", "Hidden category", null, null, "", true, null, null, false
+            });
+            new DefaultSaveProvider(pim.getTableCategories()).insertData(new Object[]{
+                "legacy-category", "Legacy category", null, null, "", true, null, null, null
+            });
+            var catalogIds = pim.getRootCategories().stream().map(item -> item.getID()).toList();
+            assertEquals(true, catalogIds.contains("legacy-category"));
+            assertEquals(false, catalogIds.contains("disabled-category"));
             try (Statement statement = session.getConnection().createStatement()) {
                 statement.execute("SHUTDOWN");
             }

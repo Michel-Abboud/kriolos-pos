@@ -19,6 +19,8 @@ package com.openbravo.pos.sales;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.DefaultComboBoxModel;
+import java.awt.event.KeyEvent;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +28,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("InputPane Unit Tests")
 class InputPaneTest {
+
+    @Test
+    void enterUsesTheActionCallbackWithoutForwardingADuplicateTypedNewline() {
+        InputPane pane = new InputPane();
+        AtomicInteger submits = new AtomicInteger();
+        StringBuilder characters = new StringBuilder();
+        pane.setOnKeyFactoryAction(submits::incrementAndGet);
+        pane.setOnKeyFactoryTyped(characters::append);
+        for (char character : new char[]{'1', '2', '\n', '\r'}) {
+            KeyEvent event = new KeyEvent(pane.getKeyFactory(), KeyEvent.KEY_TYPED,
+                    0, 0, KeyEvent.VK_UNDEFINED, character);
+            for (var listener : pane.getKeyFactory().getKeyListeners()) listener.keyTyped(event);
+        }
+        pane.getKeyFactory().postActionEvent();
+        assertEquals("12", characters.toString());
+        assertEquals(1, submits.get());
+    }
 
     @Test
     @DisplayName("Input components are initialized properly")

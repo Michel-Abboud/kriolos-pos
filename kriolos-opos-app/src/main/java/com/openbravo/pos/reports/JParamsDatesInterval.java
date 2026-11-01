@@ -27,6 +27,9 @@ import com.openbravo.basic.AppLocal;
 import com.openbravo.pos.panels.AppView;
 import java.awt.Component;
 import java.util.Date;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  *
@@ -34,9 +37,33 @@ import java.util.Date;
  */
 public class JParamsDatesInterval extends javax.swing.JPanel implements ReportEditorCreator {
 
+    private final Clock clock;
+    private boolean todayDefault;
+    private String defaultStart;
+    private String defaultEnd;
+
     /** Creates new form JParamsClosedPos */
     public JParamsDatesInterval() {
+        this(Clock.systemDefaultZone());
+    }
+
+    JParamsDatesInterval(Clock clock) {
+        this.clock = clock;
         initComponents();
+    }
+
+    /** Default to the whole current day, including sales completed after opening the report. */
+    public void setToday() {
+        todayDefault = true;
+        refreshToday();
+    }
+
+    private void refreshToday() {
+        LocalDate today = LocalDate.now(clock);
+        defaultStart = Formats.TIMESTAMP.formatValue(Date.from(today.atStartOfDay(clock.getZone()).toInstant()));
+        defaultEnd = Formats.TIMESTAMP.formatValue(Date.from(today.plusDays(1).atStartOfDay(clock.getZone()).toInstant()));
+        jTxtStartDate.setText(defaultStart);
+        jTxtEndDate.setText(defaultEnd);
     }
     
     /**
@@ -44,6 +71,7 @@ public class JParamsDatesInterval extends javax.swing.JPanel implements ReportEd
      * @param d
      */
     public void setStartDate(Date d) {
+        todayDefault = false;
         jTxtStartDate.setText(Formats.TIMESTAMP.formatValue(d));
     }
     
@@ -52,6 +80,7 @@ public class JParamsDatesInterval extends javax.swing.JPanel implements ReportEd
      * @param d
      */
     public void setEndDate(Date d) {
+        todayDefault = false;
         jTxtEndDate.setText(Formats.TIMESTAMP.formatValue(d));
     }
 
@@ -69,6 +98,12 @@ public class JParamsDatesInterval extends javax.swing.JPanel implements ReportEd
      */
     @Override
     public void activate() throws BasicException {
+        if (todayDefault && Objects.equals(defaultStart, jTxtStartDate.getText())
+                && Objects.equals(defaultEnd, jTxtEndDate.getText())) {
+            refreshToday();
+        } else {
+            todayDefault = false;
+        }
     }
     
     /**

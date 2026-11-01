@@ -217,7 +217,7 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
         m_jPanelContainer.remove(m_jPanelCatalog);
 
         m_jPanelTicket.setMinimumSize(new Dimension(0, 350));
-        m_jPanelCatalog.setMinimumSize(new Dimension(0, 80));
+        m_jPanelCatalog.setMinimumSize(new Dimension(0, 0));
         m_jPanelCatalog.setPreferredSize(new Dimension(0, 160));
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -893,7 +893,7 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
         JPaymentSelect paymentdialog = salesPaymentCoordinator.resolvePaymentDialog(
                 ticket, paymentdialogreceipt, paymentdialogrefund);
 
-        boolean printSelected = "true".equals(m_jbtnconfig.getProperty("printselected", "true"));
+        boolean printSelected = Boolean.parseBoolean(m_jbtnconfig.getProperty("printselected", "true"));
 
         return salesPaymentCoordinator.processPaymentAndClose(
                 this,
@@ -1085,7 +1085,15 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
         inputPane.addNumberEventListener(this::handleKeypadInput);
         inputPane.setOnEnterAction(this::handleBarcodeEnter);
         inputPane.setOnKeyFactoryTyped(this::stateTransition);
-        inputPane.setOnKeyFactoryAction(() -> {});
+        inputPane.setOnKeyFactoryAction(this::handleKeyboardEnter);
+        getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, 0), "sale-enter");
+        getActionMap().put("sale-enter", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                handleKeyboardEnter();
+            }
+        });
         inputPane.setOnAddTaxAction(inputPane::requestKeyFactoryFocus);
 
         setOpaque(false);
@@ -1128,6 +1136,11 @@ public abstract class JPanelTicket extends JPanel implements JPanelView, Tickets
 
     private void handleBarcodeEnter() {
         stateTransition('\n');
+    }
+
+    private void handleKeyboardEnter() {
+        // Scanner input keeps its original behavior; an idle Enter opens checkout like '='.
+        stateTransition(m_sBarcode.length() > 0 ? '\n' : '=');
     }
 
     private void handleToggleScripts(boolean selected) {

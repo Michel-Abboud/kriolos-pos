@@ -86,8 +86,8 @@ public class DataLogicCategories extends BeanFactoryDataSingle {
      */
     public void createCategory(String id, String name, boolean showName) throws BasicException {
         SentenceExec createCatSentence = new StaticSentence(this.sessionDB,
-                "INSERT INTO categories ( ID, NAME, CATSHOWNAME ) "
-                + "VALUES (?, ?, ?)",
+                "INSERT INTO categories ( ID, NAME, CATSHOWNAME, CATALOGENABLED ) "
+                + "VALUES (?, ?, ?, " + sessionDB.DB.TRUE() + ")",
                 new SerializerWriteBasic(new Datas[]{Datas.STRING, Datas.STRING, Datas.BOOLEAN}));
         createCatSentence.exec(new Object[]{id, name, showName});
     }
@@ -208,7 +208,8 @@ public class DataLogicCategories extends BeanFactoryDataSingle {
     }
 
     /**
-     * Retrieves all visible root categories (PARENTID is null and CATSHOWNAME is true).
+     * Retrieves catalog root categories, including legacy rows with an unset visibility flag.
+     * Displaying a category's name is independent of catalog visibility.
      *
      * @return list of root {@link CategoryInfo}
      * @throws BasicException on query error
@@ -226,8 +227,8 @@ public class DataLogicCategories extends BeanFactoryDataSingle {
                 + "CATALOGENABLED, "
                 + "PARENTID "
                 + "FROM categories "
-                + "WHERE PARENTID IS NULL AND CATSHOWNAME = " + sessionDB.DB.TRUE()
-                + " "
+                + "WHERE PARENTID IS NULL AND (CATALOGENABLED IS NULL OR CATALOGENABLED = "
+                + sessionDB.DB.TRUE() + ") "
                 + "ORDER BY CATORDER, NAME",
                 null,
                 CategoryInfo.getSerializerRead()).list();

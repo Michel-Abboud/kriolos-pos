@@ -418,7 +418,7 @@ public class ModernOne extends JPanel implements JPanelView, TicketsEditor {
             paymentDialog.init(app, paymentService);
         }
 
-        paymentDialog.setPrintSelected(true);
+        paymentDialog.setDefaultPrintSelected(true);
         paymentDialog.setTransactionID(activeTicket.getTransactionID());
 
         if (paymentDialog.showDialog(activeTicket.getTotal(), activeCustomer)) {

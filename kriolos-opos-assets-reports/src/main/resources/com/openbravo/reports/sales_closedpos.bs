@@ -40,9 +40,7 @@ report.addParameter("closedcash.DATEEND");
 
 paramdates = new com.openbravo.pos.reports.JParamsDatesInterval();
 
-paramdates.setStartDate(com.openbravo.beans.DateUtils.getToday());
-// JG - 8 Jan 14 paramdates.setEndDate(com.openbravo.beans.DateUtils.getToday());
-paramdates.setEndDate(com.openbravo.beans.DateUtils.getTodayMinutes());
+paramdates.setToday();
 
 report.addQBFFilter(paramdates);
 

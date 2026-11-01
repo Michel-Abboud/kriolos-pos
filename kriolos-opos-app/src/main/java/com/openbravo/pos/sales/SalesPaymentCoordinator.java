@@ -117,7 +117,7 @@ public class SalesPaymentCoordinator {
 
             ticketPrinter.accept("Printer.TicketTotal", false);
 
-            paymentDialog.setPrintSelected(printSelectedConfig);
+            paymentDialog.setDefaultPrintSelected(printSelectedConfig);
             paymentDialog.setTransactionID(ticket.getTransactionID());
 
             if (!paymentDialog.showDialog(ticket.getTotal(), ticket.getCustomer())) {

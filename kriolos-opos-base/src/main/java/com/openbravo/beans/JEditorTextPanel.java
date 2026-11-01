@@ -55,6 +55,25 @@ public class JEditorTextPanel extends JPanel {
         jcmdOK.setName("kriolos:editor:btn-ok");
         jcmdCancel.setName("kriolos:editor:btn-cancel");
         m_lblMessage.setName("kriolos:editor:lbl-message");
+        m_jKeyPad.addActionListener(event -> handleAccept());
+        getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                javax.swing.KeyStroke.getKeyStroke("ENTER"), "accept-entry");
+        getActionMap().put("accept-entry", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                handleAccept();
+            }
+        });
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            if (isShowing()) {
+                m_jtextEditor.activate();
+            }
+        });
     }
 
     private void init() {
@@ -76,6 +95,7 @@ public class JEditorTextPanel extends JPanel {
      */
     public void setModalContext(PosUIModal modalContext) {
         this.modalContext = modalContext;
+        this.accepted = false;
     }
 
     /**
@@ -97,6 +117,7 @@ public class JEditorTextPanel extends JPanel {
     public void setEditor(JEditorText newTextEditor) {
         jPanelInput.removeAll();
         m_jtextEditor = newTextEditor;
+        m_jtextEditor.setName("kriolos:editor:input-text");
         jPanelInput.add(m_jtextEditor);
         m_jtextEditor.addEditorKeys(m_jKeyPad);
         m_jtextEditor.reset();
@@ -123,6 +144,9 @@ public class JEditorTextPanel extends JPanel {
     }
 
     private void handleAccept() {
+        if (accepted) {
+            return;
+        }
         this.accepted = true;
         if (modalContext != null) {
             modalContext.setResult(getValue());

@@ -154,7 +154,14 @@ public abstract class JPaymentSelect extends JPanel implements JPaymentNotifier 
         dlCustomers = (customerService instanceof DataLogicCustomers) ? (DataLogicCustomers) customerService : app.getBean(DataLogicCustomers.class);
 
         m_jButtonPrint.setVisible(true);
-        setPrintSelected(!Boolean.parseBoolean(app.getProperties().getProperty("till.receiptprintoff")));
+        setDefaultPrintSelected(true);
+    }
+
+    /** Resets checkout's initial state while allowing a manual choice for this receipt. */
+    public void setDefaultPrintSelected(boolean resourceDefault) {
+        boolean printerOff = app != null && app.getProperties() != null
+                && Boolean.parseBoolean(app.getProperties().getProperty("till.receiptprintoff"));
+        setPrintSelected(resourceDefault && !printerOff);
     }
 
     public void setPrintSelected(boolean value) {
