@@ -25,6 +25,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -150,19 +153,35 @@ public class TicketSummaryPane extends JPanel {
         String secondaryCode = config.getProperty("currency.secondary");
         if (secondaryCode != null && !secondaryCode.isBlank()) {
             secondaryHeaderLabel.setText(currencyTotalLabel(secondaryCode));
-            totalsPanel.removeAll();
-            totalsPanel.setLayout(new GridLayout(2, 4, 4, 0));
-            totalsPanel.setPreferredSize(new Dimension(680, 60));
-            totalsPanel.add(subtotalHeaderLabel);
-            totalsPanel.add(taxHeaderLabel);
-            totalsPanel.add(totalHeaderLabel);
-            totalsPanel.add(secondaryHeaderLabel);
-            totalsPanel.add(subtotalValueLabel);
-            totalsPanel.add(taxValueLabel);
-            totalsPanel.add(totalValueLabel);
-            totalsPanel.add(secondaryValueLabel);
         }
+        configureTotalWidths(secondaryCode != null && !secondaryCode.isBlank());
         add(totalsPanel, BorderLayout.LINE_END);
+    }
+
+    private void configureTotalWidths(boolean secondary) {
+        totalValueLabel.setPreferredSize(new Dimension(260, 25));
+        secondaryValueLabel.setPreferredSize(new Dimension(260, 25));
+        JLabel[] headers = secondary
+                ? new JLabel[]{subtotalHeaderLabel, taxHeaderLabel, totalHeaderLabel, secondaryHeaderLabel}
+                : new JLabel[]{subtotalHeaderLabel, taxHeaderLabel, totalHeaderLabel};
+        JLabel[] values = secondary
+                ? new JLabel[]{subtotalValueLabel, taxValueLabel, totalValueLabel, secondaryValueLabel}
+                : new JLabel[]{subtotalValueLabel, taxValueLabel, totalValueLabel};
+        totalsPanel.removeAll();
+        totalsPanel.setLayout(new GridBagLayout());
+        totalsPanel.setPreferredSize(new Dimension(secondary ? 782 : 518, 60));
+        for (int column = 0; column < headers.length; column++) {
+            GridBagConstraints constraints = new GridBagConstraints();
+            constraints.gridx = column;
+            constraints.weightx = column >= 2 ? 1.0 : 0.0;
+            constraints.weighty = 1.0;
+            constraints.fill = GridBagConstraints.BOTH;
+            constraints.insets = new Insets(0, 0, 0, column == headers.length - 1 ? 0 : 4);
+            constraints.gridy = 0;
+            totalsPanel.add(headers[column], constraints);
+            constraints.gridy = 1;
+            totalsPanel.add(values[column], constraints);
+        }
     }
 
     /**
