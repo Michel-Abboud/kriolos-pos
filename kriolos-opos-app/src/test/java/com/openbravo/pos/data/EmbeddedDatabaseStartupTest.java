@@ -22,15 +22,19 @@ class EmbeddedDatabaseStartupTest {
         assertFalse(Files.exists(database));
         String java = Path.of(System.getProperty("java.home"), "bin", "java.exe").toString();
         if (!Files.exists(Path.of(java))) java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
-        var process = new ProcessBuilder(java, "-Djava.awt.headless=true", "-cp",
-                System.getProperty("java.class.path"), Probe.class.getName(), engine, database.toString())
-                .redirectErrorStream(true).redirectOutput(log.toFile()).start();
-        boolean finished = process.waitFor(45, TimeUnit.SECONDS);
-        if (!finished) process.destroyForcibly();
-        assertTrue(finished, () -> "Startup timed out: " + log);
-        assertEquals(0, process.exitValue(), () -> {
-            try { return Files.readString(log); } catch (Exception ex) { return log.toString(); }
-        });
+        // Each launch gets a separate JVM: the second cannot reuse driver registration
+        // or an open connection from the process that created the database.
+        for (int launch = 0; launch < 2; launch++) {
+            var process = new ProcessBuilder(java, "-Djava.awt.headless=true", "-cp",
+                    System.getProperty("java.class.path"), Probe.class.getName(), engine, database.toString())
+                    .redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            boolean finished = process.waitFor(45, TimeUnit.SECONDS);
+            if (!finished) process.destroyForcibly();
+            assertTrue(finished, () -> "Startup timed out: " + log);
+            assertEquals(0, process.exitValue(), () -> {
+                try { return Files.readString(log); } catch (Exception ex) { return log.toString(); }
+            });
+        }
         assertTrue(Files.exists(engine.equals("sqlite") ? database : Path.of(database + ".properties")));
     }
 

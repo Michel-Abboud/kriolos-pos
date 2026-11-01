@@ -41,3 +41,5 @@ The MSI appears at `dist\windows\<timestamp>\kriolosPOS-1.0.0.msi`. The command 
 The repo also has a `kriolos-opos-jpackage` Maven module and release pipeline. The script is a direct, repeatable developer workflow that uses the app module's current `target/kriolos-pos.jar` and `target/lib` output.
 
 For a portable app image without WiX, run `.\scripts\build-windows-installer.cmd -ImageOnly`. Launch `dist\windows\<timestamp>\kriolosPOS\kriolosPOS.exe`. The complete command reference, permanent PATH command, current-window workaround, and WiX checks are in [`scripts/README.md`](../../scripts/README.md).
+
+Each timestamped folder is a fixed snapshot of that build. Compiling source or running `run-dev.cmd` does not update an older `dist\windows\...\kriolosPOS.exe` or an installed copy. After a fix, rebuild without `-SkipBuild` and launch the EXE from the newest output folder, or install the newly generated MSI. Database files remain in `%APPDATA%\KriolOS`; keep them when replacing the app. A missing-driver error from an old EXE is not fixed by deleting the database.
