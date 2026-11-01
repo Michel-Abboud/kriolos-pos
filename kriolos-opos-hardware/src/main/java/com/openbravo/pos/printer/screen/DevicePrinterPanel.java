@@ -129,7 +129,11 @@ public class DevicePrinterPanel extends javax.swing.JPanel implements VirtualPri
     @Override
     public void reset() {
         currentTicket = null;
-        ticketContainer.removeAllTickets();
+        if (SwingUtilities.isEventDispatchThread()) {
+            ticketContainer.removeAllTickets();
+        } else {
+            SwingUtilities.invokeLater(ticketContainer::removeAllTickets);
+        }
     }
     
     @Override

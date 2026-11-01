@@ -51,6 +51,7 @@ public class DefaultDeviceTicket implements DeviceTicket {
     private static final Logger logger = Logger.getLogger("com.openbravo.pos.printer.DefaultDeviceTicket");
 
     private DevicePrinter n_devicePrinterPanel;
+    private final DevicePrinterPanel receiptPreview = new DevicePrinterPanel();
     private DeviceFiscalPrinter m_deviceFiscal;
     private DeviceDisplay m_devicedisplay;
     private DevicePrinter m_nullprinter;
@@ -223,5 +224,10 @@ public class DefaultDeviceTicket implements DeviceTicket {
     @Override
     public List<DevicePrinter> getDevicePrinterAll() {
         return new ArrayList<>(m_deviceprinters.values());
+    }
+
+    @Override
+    public DevicePrinter getReceiptPreviewPrinter() {
+        return receiptPreview;
     }
 }

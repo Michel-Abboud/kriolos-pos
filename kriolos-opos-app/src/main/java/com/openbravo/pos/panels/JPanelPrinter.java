@@ -60,6 +60,11 @@ public class JPanelPrinter extends JPanel implements JPanelView {
      * layout actions.
      */
     private void initComponentExtras() {
+        DevicePrinter preview = appView.getDeviceTicket().getReceiptPreviewPrinter();
+        if (preview instanceof VirtualPrinter virtualPrinter) {
+            JComponent component = virtualPrinter.getComponent(JComponent.class);
+            if (component != null) printersJTabbedPane.add(AppLocal.getIntString("printer.lastreceipt"), component);
+        }
         JComponent displayComp = PosHardwareManager.getDisplayComponent(appView.getDeviceTicket().getDeviceDisplay());
         if (displayComp != null) {
             displayJPanel.add(displayComp);

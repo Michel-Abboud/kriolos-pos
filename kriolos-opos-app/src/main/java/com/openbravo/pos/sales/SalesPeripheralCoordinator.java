@@ -172,15 +172,17 @@ public class SalesPeripheralCoordinator {
 
         String processTemplated = "";
         try {
-            ScriptEngine script = ScriptFactory.getScriptEngine(ScriptFactory.VELOCITY);
-            script.put("taxes", ticket != null ? ticket.getTaxLines() : null);
-            script.put("taxeslogic", taxeslogic);
-            script.put("ticket", ticket);
-            script.put("place", ticketext);
-            script.put("warranty", warrantyPrint);
-            script.put("pickupid", pickupId);
-
-            processTemplated = script.eval(sresource).toString();
+            processTemplated = renderReceipt(sresource, ticket, ticketext, taxeslogic, warrantyPrint, pickupId);
+            // Printer.Ticket2 contains customer-display/drawer actions only. Preview the
+            // full receipt even when physical printing is off, without replaying actions.
+            if ("Printer.Ticket2".equals(resourceName)) {
+                String receipt = xmlResourceResolver.apply("Printer.Ticket");
+                if (receipt != null) {
+                    previewReceipt(renderReceipt(receipt, ticket, ticketext, taxeslogic, warrantyPrint, pickupId), ticket);
+                }
+            } else if ("Printer.Ticket".equals(resourceName) || "Printer.ReprintTicket".equals(resourceName)) {
+                previewReceipt(processTemplated, ticket);
+            }
             ticketParser.printTicket(processTemplated, ticket);
             return true;
         } catch (ScriptException | TicketPrinterException ex) {
@@ -189,6 +191,27 @@ public class SalesPeripheralCoordinator {
                     + processTemplated + "\n\r+++++++++++++\n\r");
             new MessageInf(MessageInf.SGN_WARNING, AppLocal.getIntString("message.cannotprintticket"), ex).show(parent);
             return false;
+        }
+    }
+
+    private String renderReceipt(String template, TicketInfo ticket, String place,
+                                 TaxesLogic taxes, boolean warranty, String pickup) throws ScriptException {
+        ScriptEngine script = ScriptFactory.getScriptEngine(ScriptFactory.VELOCITY);
+        script.put("taxes", ticket != null ? ticket.getTaxLines() : null);
+        script.put("taxeslogic", taxes);
+        script.put("ticket", ticket);
+        script.put("place", place);
+        script.put("warranty", warranty);
+        script.put("pickupid", pickup);
+        return script.eval(template).toString();
+    }
+
+    private void previewReceipt(String receipt, TicketInfo ticket) {
+        try {
+            ticketParser.previewTicket(receipt, ticket);
+        } catch (TicketPrinterException ex) {
+            // A preview problem must not prevent dispatch to the configured printer.
+            LOGGER.log(Level.WARNING, "Cannot preview receipt", ex);
         }
     }
 

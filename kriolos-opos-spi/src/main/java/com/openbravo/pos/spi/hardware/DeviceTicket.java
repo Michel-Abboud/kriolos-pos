@@ -37,5 +37,8 @@ public interface DeviceTicket {
 
     List<DevicePrinter> getDevicePrinterAll();
 
+    /** Dedicated latest-receipt preview, independent of physical printer routing. */
+    default DevicePrinter getReceiptPreviewPrinter() { return null; }
+
    
 }

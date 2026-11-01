@@ -80,6 +80,7 @@ public class TicketParser extends DefaultHandler {
     private static final int OUTPUT_TICKET = 2;
     private static final int OUTPUT_FISCAL = 3;
     private DevicePrinter outputPrinter;
+    private DevicePrinter previewPrinter;
     private String currentUser;
     private String ticketId;
 
@@ -108,6 +109,16 @@ public class TicketParser extends DefaultHandler {
             LOGGER.log(Level.SEVERE, "I/O error closing StringReader.", e);
         }
 
+    }
+
+    /** Renders only receipt sections; never operates drawers, displays, sound or fiscal devices. */
+    public void previewTicket(String xmlInput, TicketInfo ticket) throws TicketPrinterException {
+        DevicePrinter preview = deviceTicket.getReceiptPreviewPrinter();
+        if (preview == null) return;
+        TicketParser parser = new TicketParser(deviceTicket, systemService);
+        parser.previewPrinter = preview;
+        preview.reset();
+        parser.printTicket(xmlInput, ticket);
     }
 
     public void printTicket(String xmlInput) throws TicketPrinterException {
@@ -203,6 +214,7 @@ public class TicketParser extends DefaultHandler {
     }
 
     private void handleNoOutputStart(String qName, Attributes attributes) throws SAXException {
+        if (previewPrinter != null && !"ticket".equals(qName)) return;
         switch (qName) {
             case "opendrawer":
                 deviceTicket.getDevicePrinter(readString(attributes.getValue("printer"), "1")).openDrawer();
@@ -220,7 +232,8 @@ public class TicketParser extends DefaultHandler {
                 break;
             case "ticket":
                 outputType = OUTPUT_TICKET;
-                outputPrinter = deviceTicket.getDevicePrinter(readString(attributes.getValue("printer"), "1"));
+                outputPrinter = previewPrinter != null ? previewPrinter
+                        : deviceTicket.getDevicePrinter(readString(attributes.getValue("printer"), "1"));
                 outputPrinter.beginReceipt();
                 break;
             case "display":
@@ -244,6 +257,7 @@ public class TicketParser extends DefaultHandler {
     }
 
     private void handleNoOutputEnd(String qName) {
+        if (previewPrinter != null) return;
 
         String textContent = (currentText != null) ? currentText.toString() : null;
         if ("play".equals(qName) && textContent != null) {

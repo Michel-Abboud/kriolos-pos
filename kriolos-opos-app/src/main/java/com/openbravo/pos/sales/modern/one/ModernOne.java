@@ -451,14 +451,9 @@ public class ModernOne extends JPanel implements JPanelView, TicketsEditor {
     private void printReceipt(TicketInfo ticket) {
         if (ticket == null || ticketParser == null)
             return;
-        try {
-            String template = (resourceService != null) ? resourceService.getResourceAsXML("Printer.Ticket") : null;
-            if (template != null && !template.isBlank()) {
-                ticketParser.printTicket(template, ticket);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Receipt printing failed or printer unavailable", e);
-        }
+        new com.openbravo.pos.sales.SalesPeripheralCoordinator(app, resourceService).printTicket(
+                paymentDialog.isPrintSelected() ? "Printer.Ticket" : "Printer.Ticket2",
+                ticket, null, taxeslogic, false, Integer.toString(ticket.getPickupId()), this);
     }
 
     private void ensureTicketUser(TicketInfo ticket) {
