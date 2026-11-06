@@ -19,6 +19,23 @@ import static org.mockito.Mockito.*;
 
 class DualCurrencyCashPanelTest {
     @Test
+    void zeroDueDisplaysExactMixedCurrencyReturn() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            var currency = new DualCurrencyTotal("USD", "LBP", "90000");
+            var panel = new DualCurrencyCashPanel(mock(JPaymentNotifier.class),
+                    currency, ignored -> { });
+            panel.activate(null, 0, null);
+            ((JEditorDoublePositive) find(panel, "kriolos:payment:given-primary")).setDoubleValue(10.0);
+            ((JEditorDoublePositive) find(panel, "kriolos:payment:given-secondary")).setDoubleValue(150000.0);
+            assertEquals(currency.formatPrimary(new BigDecimal("10"), java.util.Locale.getDefault()),
+                    ((JLabel) find(panel, "kriolos:payment:return-primary")).getText());
+            assertEquals(currency.formatSecondaryAmount(new BigDecimal("150000"), java.util.Locale.getDefault()),
+                    ((JLabel) find(panel, "kriolos:payment:return-secondary")).getText());
+            assertEquals(0.0, panel.executePayment().getTotal());
+        });
+    }
+
+    @Test
     void combinesBothEditorsShowsSplitReturnAndPersistsNormalizedPayment() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             JPaymentNotifier notifier = mock(JPaymentNotifier.class);

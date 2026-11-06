@@ -35,6 +35,19 @@ class DualCurrencyCashTest {
     }
 
     @Test
+    void zeroDueReturnsMixedTenderWithoutInventingSecondaryCash() {
+        var result = calculator.calculate(decimal("0"), decimal("10"), decimal("150000"));
+        equal("11.67", result.givenInPrimary());
+        equal("0", result.appliedInPrimary());
+        equal("10", result.returnPrimary());
+        equal("150000", result.returnSecondary());
+
+        var nonzeroDue = calculator.calculate(decimal("5"), decimal("10"), decimal("150000"));
+        equal("5", nonzeroDue.returnPrimary());
+        equal("150000", nonzeroDue.returnSecondary());
+    }
+
+    @Test
     void roundsCombinedTenderOnceAndRejectsNegativeAmounts() {
         var result = new DualCurrencyCash(new DualCurrencyTotal("USD", "EUR", "3"))
                 .calculate(decimal("5.10"), decimal("5"), decimal("0.3"));

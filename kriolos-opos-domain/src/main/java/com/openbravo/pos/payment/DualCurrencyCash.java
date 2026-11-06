@@ -23,8 +23,12 @@ public final class DualCurrencyCash {
             throw new IllegalArgumentException("Cash amounts must not be negative");
         }
         due = currency.roundPrimary(due);
-        BigDecimal paid = currency.roundPrimary(givenPrimary.add(currency.toPrimary(givenSecondary)));
-        BigDecimal change = paid.subtract(due).max(BigDecimal.ZERO);
+        BigDecimal exactTender = givenPrimary.add(currency.toPrimary(givenSecondary));
+        BigDecimal paid = currency.roundPrimary(exactTender);
+        // Keep the original secondary tender precision when calculating change.
+        // Converting rounded accounting cash back to secondary currency can
+        // invent change (e.g. LBP 150,000 -> USD 1.67 -> LBP 150,300).
+        BigDecimal change = exactTender.subtract(due).max(BigDecimal.ZERO);
         BigDecimal primaryReturn = change.divideToIntegralValue(PRIMARY_RETURN_UNIT).multiply(PRIMARY_RETURN_UNIT);
         return new Result(paid, paid.min(due), due.subtract(paid).max(BigDecimal.ZERO),
                 primaryReturn, currency.toSecondary(change.subtract(primaryReturn)));

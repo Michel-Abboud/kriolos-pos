@@ -67,6 +67,8 @@ With a valid secondary currency configured, the payment header shows **Total USD
 
 The denomination buttons (50, 20, 10, etc.) are replaced by **Return:** with **Primary** and **Secondary** amounts. The primary return is the largest multiple of 5 that does not exceed the change; the remaining change is converted to the secondary currency. For example, with `USD / LBP / 90000`, a USD 13.20 sale paid with USD 10 plus LBP 900,000 counts as USD 20 given and returns **USD 5 + LBP 162,000**. Change smaller than USD 5 is returned entirely in LBP. The bill is not rounded to a multiple of 5.
 
+Cash return uses the exact tender amounts before the accounting total is rounded to USD cents. For a zero-due sale with USD 10 plus LBP 150,000 entered, the payment applied is USD 0 and the return is **USD 10 + LBP 150,000**.
+
 When secondary currency is disabled, the existing single-currency cash screen and its `payment.cash` denomination script remain available. Other payment methods keep taking accounting-currency amounts. Tests cover conversion and return splitting, partial and secondary-only cash entry, normalized payment persistence on HSQLDB/SQLite, and the two-row header. The rendered preview is `kriolos-opos-app/target/dual-currency-payment-preview.png`.
 
 ## Sales controls and editable resources
